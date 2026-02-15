@@ -1,0 +1,43 @@
+# Node
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Logs
+.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# Environment files
+.env
+
+# Coverage
+coverage/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Archive
+*.zip
+*.tar
+*.gz
+
+# Certificates / keys
+*.pem
+*.key
+
+# Chrome/Edge extension build artifacts (if any)
+*.crx
