@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Bookmark Startpage — Настройки</title>
+  <style>
+    :root {
+      --bg: #1e1e2e;
+      --bg-surface: #262637;
+      --bg-hover: #2e2e44;
+      --bg-active: #3b3b58;
+      --text: #cdd6f4;
+      --text-muted: #7f849c;
+      --accent: #89b4fa;
+      --accent-hover: #74c7ec;
+      --border: #45475a;
+      --danger: #f38ba8;
+      --success: #a6e3a1;
+      --radius: 6px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      padding: 32px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    h1 { font-size: 22px; margin-bottom: 8px; }
+    h2 { font-size: 16px; margin: 24px 0 12px; color: var(--accent); }
+    p.hint { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+    .section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* Folder picker */
+    .folder-picker {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      margin: 8px 0;
+    }
+
+    .folder-picker__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .folder-picker__tree {
+      max-height: 450px;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .fp-node { padding-left: 20px; }
+    .fp-node[data-depth="0"] { padding-left: 0; }
+
+    .fp-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 13px;
+      transition: background 0.1s;
+      user-select: none;
+    }
+
+    .fp-row:hover { background: var(--bg-hover); }
+
+    .fp-row.selected {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .fp-row.selected .fp-arrow { color: var(--bg); }
+    .fp-row.selected .fp-count { background: rgba(0,0,0,0.2); color: var(--bg); }
+
+    .fp-arrow {
+      font-size: 10px;
+      width: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      transition: transform 0.15s;
+      flex-shrink: 0;
+    }
+    .fp-arrow.expanded { transform: rotate(90deg); }
+    .fp-arrow.empty { visibility: hidden; }
+
+    .fp-icon { font-size: 15px; flex-shrink: 0; }
+    .fp-title { flex: 1; }
+
+    .fp-count {
+      font-size: 11px;
+      padding: 1px 6px;
+      background: var(--bg-active);
+      border-radius: 8px;
+      color: var(--text-muted);
+    }
+
+    .fp-children { display: none; }
+    .fp-children.open { display: block; }
+
+    /* Selection bar */
+    .selection-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+
+    .selection-bar__label { color: var(--text-muted); flex-shrink: 0; }
+    .selection-bar__path { color: var(--accent); font-weight: 500; flex: 1; }
+
+    button.primary {
+      padding: 8px 20px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.primary:hover { background: var(--accent-hover); }
+    button.primary:disabled { opacity: 0.4; cursor: default; }
+
+    button.secondary {
+      padding: 8px 20px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button.secondary:hover { background: var(--bg-hover); }
+
+    .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+
+    .tabs-list { margin: 8px 0; }
+    .tabs-list-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; border-radius: 4px; font-size: 13px;
+    }
+    .tabs-list-item:hover { background: var(--bg-hover); }
+    .tabs-list-item__title { flex: 1; }
+    .tabs-list-item__badge {
+      font-size: 11px; padding: 2px 6px;
+      background: var(--bg-active); border-radius: 3px; color: var(--text-muted);
+    }
+    .tabs-list-item__remove {
+      color: var(--danger); cursor: pointer;
+      background: none; border: none; font-size: 14px;
+    }
+    .tabs-list-item__remove:hover { color: #ff6b8a; }
+
+    .export-url {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: 12px;
+      font-family: monospace;
+      margin-top: 8px;
+      resize: vertical;
+      word-break: break-all;
+      overflow-wrap: break-word;
+    }
+
+    .status-msg {
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      margin-top: 8px;
+      display: none;
+    }
+    .status-msg.success { display: block; background: rgba(166,227,161,0.15); color: var(--success); }
+    .status-msg.error { display: block; background: rgba(243,139,168,0.15); color: var(--danger); }
+    .status-msg.warning { display: block; background: rgba(249,226,175,0.15); color: #f9e2af; }
+
+    .import-log {
+      margin-top: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg);
+      white-space: pre-wrap;
+    }
+
+    /* Config details collapsible */
+    .config-details {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 12px;
+      overflow: hidden;
+    }
+    .config-details summary {
+      padding: 10px 0;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 13px;
+      user-select: none;
+    }
+    .config-details summary:hover { color: var(--text); }
+    .config-details[open] { padding-bottom: 12px; }
+
+    /* Options modal */
+    .opts-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      z-index: 2000; display: flex; align-items: center; justify-content: center;
+    }
+    .opts-modal-overlay[hidden] { display: none !important; }
+    .opts-modal {
+      background: var(--bg-surface); border: 1px solid var(--border);
+      border-radius: 12px; width: 400px; max-width: 90vw;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+    .opts-modal__header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+    }
+    .opts-modal__title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .opts-modal__close {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+    }
+    .opts-modal__close:hover { color: var(--text); background: var(--bg-hover); }
+    .opts-modal__body {
+      padding: 24px 16px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.7;
+      text-align: center;
+    }
+    .opts-modal__body .result-status {
+      width: 48px; height: 48px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 22px;
+    }
+    .opts-modal__body .result-status--ok { background: rgba(166,227,161,0.15); color: var(--success); }
+    .opts-modal__body .result-status--warn { background: rgba(249,226,175,0.15); color: #f9e2af; }
+    .opts-modal__body .result-status--err { background: rgba(243,139,168,0.15); color: var(--danger); }
+    .opts-modal__body .result-date { color: var(--accent); font-weight: 600; }
+    .opts-modal__body .result-error { color: var(--danger); }
+    .opts-modal__body .result-detail { color: var(--text-muted); margin-top: 6px; font-size: 12px; }
+    .opts-modal__footer {
+      display: flex; justify-content: center; padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+    .opts-modal__btn {
+      padding: 8px 32px; background: var(--accent); color: var(--bg);
+      border: none; border-radius: var(--radius); font-size: 13px;
+      cursor: pointer; font-weight: 500;
+    }
+    .opts-modal__btn:hover { background: var(--accent-hover); }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Settings controls */
+    .setting-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .setting-row input { accent-color: var(--accent); }
+
+    .setting-grid {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px 12px;
+      align-items: center;
+      margin: 12px 0;
+    }
+
+    .setting-grid__label {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .setting-grid__range {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .setting-grid__val {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+      min-width: 36px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚙️ Bookmark Startpage</h1>
+  <p class="hint">
+    Выберите папку из закладок для отображения на стартовой странице.
+    <a href="#" id="backLink" style="color:var(--accent);margin-left:8px;">← Назад</a>
+  </p>
+
+  <div class="section">
+    <h2>📁 Корневая папка</h2>
+
+    <div class="selection-bar">
+      <span class="selection-bar__label">Выбрано:</span>
+      <span class="selection-bar__path" id="selectedPath">— не выбрана —</span>
+    </div>
+
+    <div class="folder-picker">
+      <div class="folder-picker__header">
+        <span>Кликните на папку для выбора</span>
+        <span id="folderCount"></span>
+      </div>
+      <div class="folder-picker__tree" id="treePicker">
+        <p style="color:var(--text-muted);padding:12px;font-size:13px;">Загрузка закладок…</p>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="saveBtn" disabled>💾 Сохранить</button>
+    </div>
+    <div class="status-msg" id="saveStatus"></div>
+  </div>
+
+  <!-- Global Settings -->
+  <div class="section">
+    <h2>🔧 Глобальные настройки</h2>
+
+    <label class="setting-row">
+      <input type="checkbox" id="openInNewTab" checked>
+      <span>Открывать ссылки в новой вкладке</span>
+    </label>
+
+    <label class="setting-row">
+      <input type="checkbox" id="showLinksInTree" checked>
+      <span>Отображать ссылки в дереве навигатора</span>
+    </label>
+
+    <div class="setting-grid">
+      <span class="setting-grid__label">Размер шрифта табов:</span>
+      <input type="range" id="fontSizeTabs" min="10" max="20" value="13" class="setting-grid__range">
+      <span class="setting-grid__val" id="fontSizeTabsVal">13px</span>
+
+      <span class="setting-grid__label">Размер шрифта навигатора:</span>
+      <input type="range" id="fontSizeNav" min="10" max="20" value="13" class="setting-grid__range">
+      <span class="setting-grid__val" id="fontSizeNavVal">13px</span>
+
+      <span class="setting-grid__label">Размер шрифта основной области:</span>
+      <input type="range" id="fontSizeContent" min="10" max="20" value="13" class="setting-grid__range">
+      <span class="setting-grid__val" id="fontSizeContentVal">13px</span>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="saveSettingsBtn">💾 Сохранить</button>
+    </div>
+    <div class="status-msg" id="settingsStatus"></div>
+  </div>
+
+  <!-- Export / Import -->
+  <div class="section">
+    <h2>🔗 Экспорт / Импорт конфигурации</h2>
+    <p class="hint">Конфиг сохраняется как закладка в папке «Другие закладки / BookmarksStartpage». Хранятся последние 20 конфигов.</p>
+
+    <div class="btn-row" style="margin:12px 0;">
+      <button class="primary" id="configSaveBtn">💾 Сохранить конфиг</button>
+      <button class="primary" id="configLoadBtn">📂 Загрузить конфиг</button>
+      <button class="secondary" id="configCopyUrlBtn">🔗 Копировать URL</button>
+    </div>
+    <div class="status-msg" id="configStatus"></div>
+
+    <details class="config-details">
+      <summary>Ручной экспорт / импорт (текстом)</summary>
+      <h3 style="font-size:14px;color:var(--text);margin:12px 0 6px;">Экспорт</h3>
+      <div class="btn-row">
+        <button class="secondary" id="exportBtn">Сгенерировать</button>
+        <button class="secondary" id="copyBtn" style="display:none;">📋 Копировать</button>
+      </div>
+      <textarea class="export-url" id="exportStr" rows="3" style="display:none;" readonly></textarea>
+
+      <h3 style="font-size:14px;color:var(--text);margin:16px 0 6px;">Импорт</h3>
+      <textarea class="export-url" id="importStr" rows="3" placeholder="Вставьте строку конфига сюда…"></textarea>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="secondary" id="importBtn">📥 Импортировать</button>
+      </div>
+      <div class="status-msg" id="importStatus"></div>
+    </details>
+  </div>
+
+  <div class="section">
+    <h2>📑 Табы</h2>
+    <div class="tabs-list" id="tabsList"></div>
+    <p class="hint" style="margin-top: 8px;">Табы создаются на стартовой странице: ПКМ на папку → «Создать таб».</p>
+  </div>
+
+  <!-- Result modal -->
+  <div class="opts-modal-overlay" id="optsModalOverlay" hidden>
+    <div class="opts-modal">
+      <div class="opts-modal__header">
+        <span class="opts-modal__title" id="optsModalTitle"></span>
+        <button class="opts-modal__close" id="optsModalClose">✕</button>
+      </div>
+      <div class="opts-modal__body" id="optsModalBody"></div>
+      <div class="opts-modal__footer">
+        <button class="opts-modal__btn" id="optsModalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/bookmarks.js"></script>
+  <script src="js/configstore.js"></script>
+  <script src="js/options.js"></script>
+</body>
+</html>
