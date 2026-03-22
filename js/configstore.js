@@ -16,7 +16,7 @@ const ConfigStore = {
       otherBookmarks = tree.children[1];
     }
     if (!otherBookmarks) {
-      throw new Error('Не удалось найти папку «Другие закладки»');
+      throw new Error('Unable to find "Other Bookmarks" folder');
     }
 
     const otherFull = await Bookmarks.getSubTree(otherBookmarks.id);

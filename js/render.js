@@ -21,7 +21,7 @@ const Render = {
   async closeTab(tabId) {
     const tab = Tabs.list.find(t => t.id === tabId);
     if (!tab || tab.pinned) return;
-    if (!confirm(`Закрыть таб «${tab.title}»?`)) return;
+    if (!confirm(I18n.t('tabs.closeConfirm', {title: tab.title}))) return;
     await Tabs.removeTab(tabId);
     await Render.renderAll();
   },
@@ -126,7 +126,7 @@ const Render = {
     const dz = document.createElement('div');
     dz.className = 'tab-drop-zone';
     dz.textContent = '+';
-    dz.title = 'Перетащите папку сюда';
+    dz.title = I18n.t('view.dropHere');
     dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('active'); });
     dz.addEventListener('dragleave', () => dz.classList.remove('active'));
     dz.addEventListener('drop', async (e) => {
@@ -148,8 +148,8 @@ const Render = {
     if (!activeTab) {
       area.innerHTML = `
         <div class="content__empty" id="emptyState">
-          <p>Папка не выбрана.</p>
-          <button id="openSettings">Открыть настройки</button>
+          <p>${I18n.t('view.folderNotSelected')}</p>
+          <button id="openSettings">${I18n.t('view.openSettings')}</button>
         </div>`;
       return;
     }
@@ -177,7 +177,7 @@ const Render = {
         area.appendChild(Render.createExplorerView(folderNode));
       }
     } catch (e) {
-      area.innerHTML = '<div class="content__empty"><p>Ошибка: папка не найдена</p></div>';
+      area.innerHTML = '<div class="content__empty"><p>' + I18n.t('view.folderNotFound') + '</p></div>';
       console.error(e);
     }
   },
@@ -189,7 +189,7 @@ const Render = {
     ['explorer', 'flat'].forEach(mode => {
       const btn = document.createElement('button');
       btn.className = 'view-toggle__btn' + (currentMode === mode ? ' active' : '');
-      btn.textContent = mode === 'explorer' ? '📁 Проводник' : '📋 Все ссылки';
+      btn.textContent = mode === 'explorer' ? '📁 ' + I18n.t('view.explorer') : '📋 ' + I18n.t('view.allLinks');
       btn.addEventListener('click', async () => {
         Tabs.setViewMode(tabId, mode);  // synchronous + fire-and-forget save
         const tab = Tabs.list.find(t => t.id === tabId);
@@ -214,7 +214,7 @@ const Render = {
 
     Render._groups(c, rootNode, t, 0);
 
-    if (c.children.length === 0) c.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Нет закладок.</p>';
+    if (c.children.length === 0) c.innerHTML = '<p style="color:var(--text-muted);padding:20px;">' + I18n.t('view.noBookmarks') + '</p>';
     return c;
   },
 
@@ -291,7 +291,7 @@ const Render = {
     const g = document.createElement('div');
     g.className = 'bookmarks-list';
     for (const bm of bookmarks) g.appendChild(Render._link(bm, t, !hideEmptyPath));
-    if (bookmarks.length === 0) g.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Нет закладок.</p>';
+    if (bookmarks.length === 0) g.innerHTML = '<p style="color:var(--text-muted);padding:20px;">' + I18n.t('view.noBookmarks') + '</p>';
     return g;
   },
 
@@ -331,7 +331,7 @@ const Render = {
     label.draggable = true;
     label.addEventListener('dragstart', (e) => {
       e.stopPropagation();
-      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'folder', folderId: node.id, title: node.title || 'Закладки' }));
+      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'folder', folderId: node.id, title: node.title || I18n.t('bookmarks.title') }));
     });
 
     const toggle = document.createElement('span');
@@ -345,7 +345,7 @@ const Render = {
 
     const title = document.createElement('span');
     title.className = 'tree-node__title-text';
-    title.textContent = node.title || 'Закладки';
+    title.textContent = node.title || I18n.t('bookmarks.title');
     label.appendChild(title);
 
     if (count > 0) {
@@ -423,7 +423,7 @@ const Render = {
     const target = Render.linkTarget();
 
     if (!node.children || node.children.length === 0) {
-      panel.innerHTML = '<p style="color:var(--text-muted);padding:20px;">Пустая папка.</p>';
+      panel.innerHTML = '<p style="color:var(--text-muted);padding:20px;">' + I18n.t('view.emptyFolder') + '</p>';
       return;
     }
 

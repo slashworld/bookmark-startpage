@@ -34,7 +34,7 @@ const Tabs = {
         const node = await Bookmarks.getNode(config.rootFolderId);
         Tabs.list.push({
           id: Storage.generateTabId(),
-          title: node.title || 'Главный',
+          title: node.title || (typeof I18n !== 'undefined' ? I18n.t('tabs.main') : 'Main'),
           bookmarkFolderId: config.rootFolderId,
           pinned: true, order: 0, color: null, viewMode: 'explorer'
         });

@@ -5,11 +5,27 @@
 let selectedFolderId = null;
 
 (async function init() {
+  // Initialize i18n first
+  await I18n.init();
+  
   setupBackLink();
 
   try {
     const config = await Storage.load();
     selectedFolderId = config.rootFolderId;
+    
+    // Set language selector value
+    const langSelect = document.getElementById('languageSelect');
+    if (langSelect) {
+      const currentLang = config.settings?.language || 'auto';
+      langSelect.value = currentLang;
+      
+      // Handle language change
+      langSelect.addEventListener('change', async (e) => {
+        const newLang = e.target.value;
+        await I18n.setLanguage(newLang);
+      });
+    }
 
     const tree = await Bookmarks.getTree();
     const picker = document.getElementById('treePicker');
@@ -26,7 +42,7 @@ let selectedFolderId = null;
       }
     }
 
-    document.getElementById('folderCount').textContent = folderCount + ' папок';
+    document.getElementById('folderCount').textContent = I18n.t('folder.count', {count: folderCount});
     updateSelectionDisplay();
     renderTabsList(config.tabs || []);
 
@@ -41,7 +57,7 @@ let selectedFolderId = null;
   } catch (err) {
     console.error('Init error:', err);
     document.getElementById('treePicker').innerHTML =
-      '<p style="color:var(--danger);padding:12px;">Ошибка: ' + err.message + '</p>';
+      '<p style="color:var(--danger);padding:12px;">' + I18n.t('common.error') + ': ' + err.message + '</p>';
   }
 })();
 
@@ -82,14 +98,14 @@ function renderNode(container, node, depth) {
 
   const title = document.createElement('span');
   title.className = 'fp-title';
-  title.textContent = node.title || 'Закладки';
+  title.textContent = node.title || I18n.t('bookmarks.title');
   row.appendChild(title);
 
   if (totalLinks > 0) {
     const badge = document.createElement('span');
     badge.className = 'fp-count';
     badge.textContent = totalLinks;
-    badge.title = totalLinks + ' ссылок всего';
+    badge.title = totalLinks + ' ' + I18n.t('bookmarks.title').toLowerCase();
     row.appendChild(badge);
   }
 
@@ -137,9 +153,9 @@ async function updateSelectionDisplay() {
   const pathEl = document.getElementById('selectedPath');
   if (selectedFolderId) {
     const path = await Bookmarks.getFolderPath(selectedFolderId);
-    pathEl.textContent = path || 'Корень';
+    pathEl.textContent = path || I18n.t('folder.notSelected');
   } else {
-    pathEl.textContent = '— не выбрана —';
+    pathEl.textContent = '— ' + I18n.t('folder.notSelected') + ' —';
   }
 }
 
@@ -153,11 +169,11 @@ document.getElementById('saveBtn').addEventListener('click', async function() {
   const node = await Bookmarks.getNode(selectedFolderId);
   if (config.tabs.length > 0) {
     config.tabs[0].bookmarkFolderId = selectedFolderId;
-    config.tabs[0].title = node.title || 'Главный';
+    config.tabs[0].title = node.title || I18n.t('tabs.main');
   } else {
     config.tabs.push({
       id: Storage.generateTabId(),
-      title: node.title || 'Главный',
+      title: node.title || I18n.t('tabs.main'),
       bookmarkFolderId: selectedFolderId,
       pinned: true,
       order: 0,
@@ -166,7 +182,7 @@ document.getElementById('saveBtn').addEventListener('click', async function() {
   }
 
   await Storage.save(config);
-  showStatus('saveStatus', '✓ Сохранено!', 'success');
+  showStatus('saveStatus', '✓ ' + I18n.t('status.saved'), 'success');
   renderTabsList(config.tabs);
 });
 
@@ -176,7 +192,7 @@ function renderTabsList(tabs) {
   const list = document.getElementById('tabsList');
   list.innerHTML = '';
   if (tabs.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Нет табов.</p>';
+    list.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">' + I18n.t('tabs.noTabs') + '</p>';
     return;
   }
   for (const tab of tabs) {
@@ -207,7 +223,7 @@ function renderTabsList(tabs) {
       const removeBtn = document.createElement('button');
       removeBtn.className = 'tabs-list-item__remove';
       removeBtn.textContent = '✕';
-      removeBtn.title = 'Удалить таб';
+      removeBtn.title = I18n.t('tabs.close');
       removeBtn.addEventListener('click', async function() {
         const cfg = await Storage.load();
         cfg.tabs = cfg.tabs.filter(function(t) { return t.id !== tab.id; });
@@ -232,9 +248,15 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async funct
   config.settings.fontSizeTabs = parseInt(document.getElementById('fontSizeTabs').value) || 13;
   config.settings.fontSizeNav = parseInt(document.getElementById('fontSizeNav').value) || 13;
   config.settings.fontSizeContent = parseInt(document.getElementById('fontSizeContent').value) || 13;
+  
+  // Save language setting
+  const langSelect = document.getElementById('languageSelect');
+  if (langSelect) {
+    config.settings.language = langSelect.value;
+  }
 
   await Storage.save(config);
-  showStatus('settingsStatus', '✓ Настройки сохранены!', 'success');
+  showStatus('settingsStatus', '✓ ' + I18n.t('status.settingsSaved'), 'success');
 });
 
 ['fontSizeTabs', 'fontSizeNav', 'fontSizeContent'].forEach(id => {
@@ -252,18 +274,18 @@ function updateFontLabels() {
 document.getElementById('configSaveBtn').addEventListener('click', async function() {
   const btn = this;
   btn.disabled = true;
-  btn.textContent = '⏳ Сохранение...';
+  btn.textContent = '⏳ ' + I18n.t('status.saving');
 
   try {
     const result = await ConfigStore.save();
-    showStatus('configStatus', '✓ Конфиг сохранён: ' + result.title, 'success');
+    showStatus('configStatus', '✓ ' + I18n.t('status.configSaved', {title: result.title}), 'success');
     AutoSave.reset(); // just saved manually, reset timer
   } catch (e) {
     console.error('Config save error:', e);
-    showStatus('configStatus', '✕ Ошибка сохранения: ' + e.message, 'error');
+    showStatus('configStatus', '✕ ' + I18n.t('common.error') + ': ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '💾 Сохранить конфиг';
+    btn.textContent = '💾 ' + I18n.t('export.save');
   }
 });
 
@@ -276,11 +298,11 @@ document.getElementById('configCopyUrlBtn').addEventListener('click', async func
     const configStr = await Storage.exportToString();
     const url = chrome.runtime.getURL('newtab.html') + '#config=' + configStr;
     await navigator.clipboard.writeText(url);
-    btn.textContent = '✓ Скопировано!';
-    setTimeout(() => { btn.textContent = '🔗 Копировать URL'; btn.disabled = false; }, 2000);
+    btn.textContent = '✓ ' + I18n.t('common.copied');
+    setTimeout(() => { btn.textContent = '🔗 ' + I18n.t('export.copyUrl'); btn.disabled = false; }, 2000);
   } catch (e) {
     console.error('Copy URL error:', e);
-    showStatus('configStatus', '✕ Ошибка: ' + e.message, 'error');
+    showStatus('configStatus', '✕ ' + I18n.t('common.error') + ': ' + e.message, 'error');
     btn.disabled = false;
   }
 });
@@ -291,66 +313,66 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
   // 4. Confirm if current config is not empty
   const currentConfig = await Storage.load();
   if (currentConfig.tabs && currentConfig.tabs.length > 0) {
-    if (!confirm('Текущий конфиг содержит ' + currentConfig.tabs.length + ' табов.\nЗаменить его загруженным?')) {
+    if (!confirm(I18n.t('export.confirmReplace', {count: currentConfig.tabs.length}))) {
       return;
     }
   }
 
   const btn = this;
   btn.disabled = true;
-  btn.textContent = '⏳ Загрузка...';
+  btn.textContent = '⏳ ' + I18n.t('status.loading');
 
   try {
     const result = await ConfigStore.load();
 
     if (!result) {
-      OptsModal.show('Загрузка конфига',
+      OptsModal.show(I18n.t('export.load'),
         '<div class="result-status result-status--warn">!</div>' +
-        '<p>Сохранённые конфиги не найдены.</p>' +
-        '<p class="result-detail">Папка «Другие закладки / ' + CONFIG_FOLDER_NAME + '» пуста или не существует.</p>'
+        '<p>' + I18n.t('export.configNotFound') + '</p>' +
+        '<p class="result-detail">' + I18n.t('export.configFolder') + '</p>'
       );
       return;
     }
 
     const importResult = await applyImportedConfig(result.data);
     const dateStr = result.timestamp
-      ? result.timestamp.toLocaleString('ru-RU')
-      : 'неизвестно';
+      ? result.timestamp.toLocaleString()
+      : I18n.t('common.none');
 
     if (importResult.failed === 0) {
-      OptsModal.show('Конфиг загружен',
+      OptsModal.show(I18n.t('export.loaded'),
         '<div class="result-status result-status--ok">✓</div>' +
-        '<p>Конфигурация успешно загружена</p>' +
-        '<p>Дата конфига: <span class="result-date">' + dateStr + '</span></p>' +
-        '<p class="result-detail">Табов: ' + importResult.imported + ', настройки применены</p>',
+        '<p>' + I18n.t('export.loaded') + '</p>' +
+        '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
+        '<p class="result-detail">' + I18n.t('export.tabsCount', {imported: importResult.imported}) + '</p>',
         function() { location.reload(); }
       );
     } else if (importResult.imported > 0) {
-      OptsModal.show('Частичная загрузка',
+      OptsModal.show(I18n.t('export.partialLoad'),
         '<div class="result-status result-status--warn">!</div>' +
-        '<p>Конфиг загружен частично</p>' +
-        '<p>Дата конфига: <span class="result-date">' + dateStr + '</span></p>' +
-        '<p class="result-detail">Загружено: ' + importResult.imported + ', не найдено: ' + importResult.failed + '</p>' +
-        '<p class="result-detail">Убедитесь, что структура закладок совпадает</p>',
+        '<p>' + I18n.t('export.partialLoad') + '</p>' +
+        '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
+        '<p class="result-detail">' + I18n.t('export.loadedPartial', {imported: importResult.imported, failed: importResult.failed}) + '</p>' +
+        '<p class="result-detail">' + I18n.t('export.structureDiffers') + '</p>',
         function() { location.reload(); }
       );
     } else {
-      OptsModal.show('Ошибка загрузки',
+      OptsModal.show(I18n.t('export.loadError'),
         '<div class="result-status result-status--err">✕</div>' +
-        '<p>Ни одна папка из конфига не найдена</p>' +
-        '<p>Дата конфига: <span class="result-date">' + dateStr + '</span></p>' +
-        '<p class="result-detail">Структура закладок на этом ПК отличается от источника</p>'
+        '<p>' + I18n.t('export.noneLoaded') + '</p>' +
+        '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
+        '<p class="result-detail">' + I18n.t('export.structureDiffers') + '</p>'
       );
     }
   } catch (e) {
     console.error('Config load error:', e);
-    OptsModal.show('Ошибка',
+    OptsModal.show(I18n.t('common.error'),
       '<div class="result-status result-status--err">✕</div>' +
       '<p class="result-error">' + e.message + '</p>'
     );
   } finally {
     btn.disabled = false;
-    btn.textContent = '📂 Загрузить конфиг';
+    btn.textContent = '📂 ' + I18n.t('export.load');
   }
 });
 
@@ -413,7 +435,7 @@ document.getElementById('exportBtn').addEventListener('click', async function() 
     document.getElementById('copyBtn').style.display = '';
   } catch (e) {
     console.error('Export error:', e);
-    alert('Ошибка экспорта: ' + e.message);
+    alert(I18n.t('status.exportError', {message: e.message}));
   }
 });
 
@@ -422,8 +444,8 @@ document.getElementById('copyBtn').addEventListener('click', function() {
   textarea.select();
   navigator.clipboard.writeText(textarea.value).then(function() {
     var btn = document.getElementById('copyBtn');
-    btn.textContent = '✓ Скопировано!';
-    setTimeout(function() { btn.textContent = '📋 Копировать'; }, 2000);
+    btn.textContent = '✓ ' + I18n.t('common.copied');
+    setTimeout(function() { btn.textContent = '📋 ' + I18n.t('export.copy'); }, 2000);
   });
 });
 
@@ -432,20 +454,20 @@ document.getElementById('copyBtn').addEventListener('click', function() {
 document.getElementById('importBtn').addEventListener('click', async function() {
   const str = document.getElementById('importStr').value.trim();
   if (!str) {
-    showStatus('importStatus', 'Вставьте строку конфига', 'error');
+    showStatus('importStatus', I18n.t('status.pasteConfig'), 'error');
     return;
   }
 
   const data = Storage.parseConfigString(str);
   if (!data) {
-    showStatus('importStatus', '✕ Неверный формат', 'error');
+    showStatus('importStatus', '✕ ' + I18n.t('status.invalidFormat'), 'error');
     return;
   }
 
   // Confirm if current config is not empty
   const currentConfig = await Storage.load();
   if (currentConfig.tabs && currentConfig.tabs.length > 0) {
-    if (!confirm('Текущий конфиг содержит ' + currentConfig.tabs.length + ' табов.\nЗаменить его импортированным?')) {
+    if (!confirm(I18n.t('export.confirmReplace', {count: currentConfig.tabs.length}))) {
       return;
     }
   }
@@ -453,14 +475,14 @@ document.getElementById('importBtn').addEventListener('click', async function() 
   try {
     const result = await applyImportedConfig(data);
     if (result.failed === 0) {
-      showStatus('importStatus', '✓ Импортировано: ' + result.imported + ' табов', 'success');
+      showStatus('importStatus', '✓ ' + I18n.t('export.imported', {count: result.imported}), 'success');
     } else {
-      showStatus('importStatus', '⚠ Импорт: ' + result.imported + ' ок, ' + result.failed + ' не найдено', 'warning');
+      showStatus('importStatus', '⚠ ' + I18n.t('status.importError', {message: result.imported + ' OK, ' + result.failed + ' not found'}), 'warning');
     }
     setTimeout(function() { location.reload(); }, 2000);
   } catch (e) {
     console.error('Import error:', e);
-    showStatus('importStatus', '✕ Ошибка: ' + e.message, 'error');
+    showStatus('importStatus', '✕ ' + I18n.t('status.importError', {message: e.message}), 'error');
   }
 });
 

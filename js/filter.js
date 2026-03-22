@@ -62,7 +62,7 @@ const Filter = {
 
       const header = document.createElement('div');
       header.style.cssText = 'color:var(--text-muted);font-size:13px;margin-bottom:12px;';
-      header.textContent = `Найдено: ${allResults.length} (в табе "${tab.title}")`;
+      header.textContent = I18n.t('search.found', {count: allResults.length, title: tab.title});
       area.appendChild(header);
 
       area.appendChild(Render.createBookmarksList(allResults, false));
@@ -110,7 +110,7 @@ const Filter = {
     Filter.highlightTabs(query);
 
     if (totalResults === 0) {
-      area.innerHTML = '<div style="color:var(--text-muted);padding:40px;text-align:center;">Ничего не найдено</div>';
+      area.innerHTML = '<div style="color:var(--text-muted);padding:40px;text-align:center;">' + I18n.t('search.nothingFound') + '</div>';
     }
   },
 

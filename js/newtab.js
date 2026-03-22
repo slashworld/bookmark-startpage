@@ -3,6 +3,10 @@
  */
 
 (async function init() {
+  // Initialize i18n first
+  await I18n.init();
+  I18n.setupSync(); // Enable language sync across tabs
+  
   // Handle config import from URL hash (#config=<base64>)
   if (location.hash.startsWith('#config=')) {
     const base64 = location.hash.slice('#config='.length);
@@ -10,7 +14,7 @@
     if (data) {
       const currentConfig = await Storage.load();
       const hasExisting = currentConfig.tabs && currentConfig.tabs.length > 0;
-      const doImport = !hasExisting || confirm('Текущий конфиг содержит ' + currentConfig.tabs.length + ' табов.\nЗаменить его импортированным?');
+      const doImport = !hasExisting || confirm(I18n.t('export.confirmReplace', {count: currentConfig.tabs.length}));
       if (doImport) {
         try {
           await applyUrlImport(data);
