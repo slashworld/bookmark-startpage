@@ -4,9 +4,19 @@
 
 // ==================== Config Import Handler ====================
 
-async function handleConfigImport() {
+let _importPending = false;
+
+async function handleConfigImport(fromUserAction = false) {
   if (!location.hash.startsWith('#config=')) return;
   
+  // Only proceed with confirm() if from user action (hashchange) or page is visible
+  if (!fromUserAction && document.hidden) {
+    // Page not visible, wait for visibility
+    _importPending = true;
+    return;
+  }
+  
+  _importPending = false;
   const encodedBase64 = location.hash.slice('#config='.length);
   const base64 = decodeURIComponent(encodedBase64);
   const data = Storage.parseConfigString(base64);
@@ -37,6 +47,13 @@ async function handleConfigImport() {
   history.replaceState(null, '', location.pathname);
 }
 
+// Handle visibility change to process pending import
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && _importPending && location.hash.startsWith('#config=')) {
+    handleConfigImport(true);
+  }
+});
+
 // ==================== Main Init ====================
 
 (async function init() {
@@ -45,10 +62,11 @@ async function handleConfigImport() {
   I18n.setupSync(); // Enable language sync across tabs
   
   // Handle config import from URL hash (initial load)
-  await handleConfigImport();
+  // Delay slightly to allow page to become active
+  setTimeout(() => handleConfigImport(false), 100);
   
   // Listen for hash changes (when user pastes URL with hash)
-  window.addEventListener('hashchange', handleConfigImport);
+  window.addEventListener('hashchange', () => handleConfigImport(true));
 
   await Tabs.init();
   ContextMenu.init();

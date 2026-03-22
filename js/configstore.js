@@ -134,7 +134,7 @@ const AutoSave = {
         await ConfigStore.save();
         console.log('[BSP] AutoSave: config saved to bookmarks');
       } catch (e) {
-        console.error('[BSP] AutoSave error:', e);
+        console.error('[BSP] AutoSave error:', e.message || e);
       }
     }, AutoSave.DELAY);
   },

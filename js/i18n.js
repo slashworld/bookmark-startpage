@@ -66,10 +66,21 @@ const I18n = {
       const url = chrome.runtime?.getURL 
         ? chrome.runtime.getURL(`locales/${lang}.json`)
         : `locales/${lang}.json`;
+      console.log('[I18n] Loading translations from:', url);
       const response = await fetch(url);
-      this._translations = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const text = await response.text();
+      try {
+        this._translations = JSON.parse(text);
+        console.log('[I18n] Loaded translations for', lang, '- keys:', Object.keys(this._translations).join(', '));
+      } catch (parseError) {
+        console.error('[I18n] Failed to parse JSON:', parseError);
+        throw parseError;
+      }
     } catch (e) {
-      console.error(`Failed to load translations for ${lang}:`, e);
+      console.error(`[I18n] Failed to load translations for ${lang}:`, e);
       // Fallback to English
       if (lang !== this._fallbackLang) {
         try {
@@ -77,9 +88,10 @@ const I18n = {
             ? chrome.runtime.getURL(`locales/${this._fallbackLang}.json`)
             : `locales/${this._fallbackLang}.json`;
           const response = await fetch(url);
-          this._translations = await response.json();
+          const text = await response.text();
+          this._translations = JSON.parse(text);
         } catch (e2) {
-          console.error('Failed to load fallback translations:', e2);
+          console.error('[I18n] Failed to load fallback translations:', e2);
           this._translations = {};
         }
       }
