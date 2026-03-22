@@ -2,30 +2,53 @@
  * newtab.js — Main entry point
  */
 
+// ==================== Config Import Handler ====================
+
+async function handleConfigImport() {
+  if (!location.hash.startsWith('#config=')) return;
+  
+  const encodedBase64 = location.hash.slice('#config='.length);
+  const base64 = decodeURIComponent(encodedBase64);
+  const data = Storage.parseConfigString(base64);
+  
+  if (!data) {
+    console.error('Failed to parse config from URL');
+    return;
+  }
+  
+  const currentConfig = await Storage.load();
+  const hasExisting = currentConfig.tabs && currentConfig.tabs.length > 0;
+  const doImport = !hasExisting || confirm(I18n.t('export.confirmReplace', {count: currentConfig.tabs.length}));
+  
+  if (doImport) {
+    try {
+      await applyUrlImport(data);
+      // Re-render after import
+      await Tabs.init();
+      await initGlobalSettings();
+      await Render.renderAll();
+    } catch (e) {
+      console.error('URL import failed:', e);
+      alert('Import failed: ' + e.message);
+    }
+  }
+  
+  // Clear hash to prevent re-import on refresh
+  history.replaceState(null, '', location.pathname);
+}
+
+// ==================== Main Init ====================
+
 (async function init() {
   // Initialize i18n first
   await I18n.init();
   I18n.setupSync(); // Enable language sync across tabs
   
-  // Handle config import from URL hash (#config=<base64>)
-  if (location.hash.startsWith('#config=')) {
-    const encodedBase64 = location.hash.slice('#config='.length);
-    const base64 = decodeURIComponent(encodedBase64);
-    const data = Storage.parseConfigString(base64);
-    if (data) {
-      const currentConfig = await Storage.load();
-      const hasExisting = currentConfig.tabs && currentConfig.tabs.length > 0;
-      const doImport = !hasExisting || confirm(I18n.t('export.confirmReplace', {count: currentConfig.tabs.length}));
-      if (doImport) {
-        try {
-          await applyUrlImport(data);
-        } catch (e) {
-          console.error('URL import failed:', e);
-        }
-      }
-      history.replaceState(null, '', location.pathname);
-    }
-  }
+  // Handle config import from URL hash (initial load)
+  await handleConfigImport();
+  
+  // Listen for hash changes (when user pastes URL with hash)
+  window.addEventListener('hashchange', handleConfigImport);
 
   await Tabs.init();
   ContextMenu.init();
