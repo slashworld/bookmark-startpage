@@ -86,8 +86,7 @@
     "copy": "Copy",
     "import": "Import",
     "pasteHint": "Paste config string here…",
-    "confirmReplace": "Current config contains {count} tabs.
-Replace with imported?",
+    "confirmReplace": "Current config contains {count} tabs.\nReplace with imported?",
     "configNotFound": "Saved configs not found.",
     "configFolder": "Folder «Other Bookmarks / BookmarksStartpage» is empty or doesn't exist.",
     "loaded": "Configuration loaded",
