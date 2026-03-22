@@ -3,7 +3,6 @@
   "name": "Bookmark Startpage",
   "version": "0.1.0",
   "description": "Custom start page powered by your bookmarks",
-  "default_locale": "en",
   "permissions": [
     "bookmarks",
     "storage",
