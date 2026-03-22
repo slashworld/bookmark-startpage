@@ -23,17 +23,17 @@ async function handleConfigImport() {
   if (doImport) {
     try {
       await applyUrlImport(data);
-      // Re-render after import
-      await Tabs.init();
-      await initGlobalSettings();
-      await Render.renderAll();
+      // Clear hash and reload page to show imported config
+      history.replaceState(null, '', location.pathname);
+      location.reload();
+      return;
     } catch (e) {
       console.error('URL import failed:', e);
       alert('Import failed: ' + e.message);
     }
   }
   
-  // Clear hash to prevent re-import on refresh
+  // Clear hash to prevent re-import on refresh (if user cancelled)
   history.replaceState(null, '', location.pathname);
 }
 
