@@ -1,158 +1,85 @@
 # Bookmark Startpage
 
-Расширение для Chrome, которое заменяет стандартную новую вкладку на настраиваемую стартовую страницу из закладок.
+A Chrome extension that replaces the new tab page with a customizable start page powered by your bookmarks.
 
-## Установка (из локальной папки)
+## Features
 
-1. Скачать и распаковать в любой каталог
-2. Откройте `chrome://extensions/`
-3. Включите **Режим разработчика** (переключатель в правом верхнем углу)
-4. Нажмите **Загрузить распакованное расширение**
-5. Выберите папку с файлами проекта `bookmark-startpage`
+- **Tab-based navigation** - Organize bookmarks into tabs for quick access
+- **Visual customization** - Choose colors for tabs, adjust font sizes
+- **Two view modes** - Explorer (folder tree) or flat list of all bookmarks
+- **Search** - Find bookmarks across all folders or in current tab only
+- **Import/Export** - Share configurations via URL or save to bookmarks
+- **Bookmark management** - Add, edit, delete bookmarks and folders directly from start page
+- **Multi-language** - Supports English and Russian (auto-detects browser language)
+- **Dark theme** - Beautiful Catppuccin Mocha color scheme
 
-После установки каждая новая вкладка будет открываться со стартовой страницей.
+## Permissions
 
-## Первый запуск
+- `bookmarks` - Read and manage your bookmarks
+- `storage` - Save extension settings
+- `favicon` - Display website icons
 
-При первом открытии новой вкладки отобразится сообщение «Папка не выбрана». Перейдите в настройки расширения (или значок ⚙️ в правом верхнем углу с основной страницы расширения) и выберите корневую папку из дерева закладок. Все вложенные папки и ссылки из неё будут отображаться на стартовой странице.
+## Installation
 
-## Возможности
+### From Chrome Web Store
+*(Coming soon)*
 
-### Табы
+### Manual Installation (Developer Mode)
 
-Стартовая страница поддерживает систему табов — каждый таб привязан к отдельной папке закладок.
+1. Download and extract the extension files
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode" in the top right
+4. Click "Load unpacked" and select the extension folder
+5. Open a new tab to see the start page
 
-- **Создать таб** — правый клик на папке в дереве навигации → «Создать таб из папки»
-- **Закрыть таб** — кнопка ✕ на табе или средний клик мыши
-- **Перетащить** — табы можно перетаскивать для изменения порядка
-- **Закрепить/открепить** — правый клик на табе → «Закрепить таб». Закреплённый таб нельзя случайно закрыть
-- **Цвет** — правый клик на табе → выбрать цвет из палитры
+## Usage
 
-### Режимы просмотра
+1. **First setup**: Click "Open settings" and select a root bookmark folder
+2. **Create tabs**: Right-click on any folder → "Create tab from folder"
+3. **Manage bookmarks**: Right-click on bookmarks or folders for context menu
+4. **Customize**: Open settings to change font sizes, colors, and behavior
+5. **Backup**: Use "Save config" to backup settings as a bookmark
 
-Каждый таб запоминает свой режим:
+## Configuration Export/Import
 
-- **Проводник** — древовидная навигация слева + содержимое папки справа (как в файловом менеджере)
-- **Все ссылки** — плоский список всех закладок, сгруппированный по папкам
+The extension can export your entire configuration (tabs, settings, selected folders) as a URL that you can:
+- Share with others
+- Open on another device to import settings
+- Save as a bookmark for automatic backup
 
-Переключатель режимов появляется автоматически, если в папке есть вложенные подпапки.
+## Development
 
-### Управление закладками
+This extension uses vanilla JavaScript with no build tools or frameworks.
 
-Все операции выполняются через контекстное меню (правый клик):
-
-**На папке:**
-
-- Добавить закладку
-- Добавить вложенную папку
-- Переименовать папку
-- Удалить папку (с подтверждением)
-
-**На закладке:**
-
-- Редактировать (название и URL)
-- Удалить
-
-Если папка пуста, в основной области отображаются кнопки для добавления закладки или вложенной папки.
-
-Все изменения сохраняются напрямую в хранилище закладок Chrome — они будут видны и в стандартном менеджере закладок.
-
-### Поиск
-
-Поле поиска фильтрует закладки по названию и URL в реальном времени. Кнопка ✕ очищает фильтр.
-
-### Сохранение состояния
-
-- Активный таб запоминается при перезагрузке
-- Выбранная папка в дереве навигации сохраняется для каждого таба
-- Развёрнутые/свёрнутые папки в дереве сохраняются для каждого таба
-- Режим просмотра (Проводник/Все ссылки) сохраняется для каждого таба
-
-## Настройки
-
-Страница настроек доступна через значок ⚙️ в правом верхнем углу стартовой страницы.
-
-### Корневая папка
-
-Основная папка, из которой берутся закладки. Кликните на нужную папку в дереве и нажмите «Сохранить». Из неё создаются другие табы. Если мешает в табах её можно убрать и при необходимости потом снова добавить.
-
-### Глобальные настройки
-
-- **Открывать ссылки в новой вкладке** — если выключено, будет открывать в той же вкладке.
-- **Отображать ссылки в дереве навигатора** — показывать ли отдельные ссылки в дереве слева.
-- **Размер шрифта** — отдельно для табов, навигатора и основной области.
-
-### Экспорт / Импорт конфигурации
-
-Конфигурация включает список табов, настройки и привязки к папкам.
-
-**Через закладки (рекомендуется):**
-
-- **Сохранить конфиг** — сохраняет текущую конфигурацию как закладку в папке `Другие закладки / BookmarksStartpage`. Хранятся последние 20 версий, старые удаляются автоматически
-- **Загрузить конфиг** — загружает самую свежую сохранённую конфигурацию из этой папки. Результат отображается в модальном окне с датой конфига
-- **Копировать URL** — копирует в буфер обмена ссылку с конфигом. Эту ссылку можно сохранить в обычные закладки или отправить на другой ПК
-- **Импорт через URL** — скопированный URL из настроек, закладок или откуда-либо ещё достаточно вставить в адресную строку браузера и настройки сразу же импортируются
-
-**Ручной экспорт/импорт (текстом):**
-
-Доступен в сворачиваемом блоке. Генерирует base64-строку, которую можно скопировать и вставить на другом ПК.
-
-**Автосохранение:**
-
-Через 2 минуты после любого изменения конфигурации (настройки, табы) конфиг автоматически сохраняется в папку `BookmarksStartpage`.
-
-### Совместимость между компьютерами
-
-При экспорте вместо ID папок сохраняются их пути. При импорте расширение ищет папки несколькими способами:
-
-1. Точное совпадение пути
-2. По индексу верхнеуровневой папки + относительному пути (нивелирует разницу в локализациях, например «Bookmarks bar» vs «Панель закладок»)
-3. По относительному пути во всех верхнеуровневых папках
-4. По имени последней папки в пути
-
-Для успешного переноса структура вложенных папок должна совпадать.
-
-## Структура файлов
-
+### File Structure
 ```
-bookmark-startpage/
-├── manifest.json          # Manifest V3
-├── newtab.html            # Стартовая страница
-├── options.html           # Страница настроек
-├── css/
-│   └── newtab.css         # Стили стартовой страницы
-├── js/
-│   ├── storage.js         # Чтение/запись конфига (chrome.storage.local)
-│   ├── bookmarks.js       # Обёртка над Chrome Bookmarks API + CRUD
-│   ├── configstore.js     # Сохранение конфига в закладки + автосохранение
-│   ├── tabs.js            # Управление табами
-│   ├── render.js          # Рендеринг UI (табы, дерево, контент)
-│   ├── filter.js          # Поиск/фильтрация закладок
-│   ├── contextmenu.js     # Контекстные меню + модальные диалоги
-│   ├── newtab.js          # Точка входа стартовой страницы
-│   └── options.js         # Логика страницы настроек
-└── icons/
-    ├── icon48.png
-    └── icon128.png
+js/
+  newtab.js      # Entry point
+  options.js     # Settings page
+  storage.js     # Config persistence
+  bookmarks.js   # Chrome Bookmarks API wrapper
+  tabs.js        # Tab management
+  render.js      # UI rendering
+  filter.js      # Search functionality
+  contextmenu.js # Context menus and modals
+  configstore.js # Config backup via bookmarks
+  i18n.js        # Localization
+
+locales/
+  en.json        # English translations
+  ru.json        # Russian translations
 ```
 
-## Технические детали
+## License
 
-- **Manifest V3**, без фоновых скриптов (service worker)
-- **Vanilla JS**, без фреймворков и сборщиков
-- **CSP-совместимый** — нет inline-обработчиков событий
-- Все данные хранятся в `chrome.storage.local` (ключ `bsp_config`)
-- Изменения закладок через стандартный `chrome.bookmarks` API
-- Тёмная тема (Catppuccin Mocha)
-- Совместимые браузеры (проверенные): Chrome
+MIT
 
+## Privacy
 
-# TODO
+This extension:
+- Does not collect any personal data
+- Does not send data to external servers
+- Stores all data locally in your browser
+- Only accesses bookmarks and storage APIs as needed for functionality
 
-- [ ] Сделать изменение изменение позиции ссылки или папки с помощью перетаскивания мышью
-- [ ] Создать нормальные иконки
-- [ ] Опубликовать расширение в магазине хрома
-- [ ] Светлая тема, набор тем
-- [ ] Локализация на english и возможно какие-то другие языки
-- [ ] Автозагрузка обновлённого конфига (+ в настроках активация/деактивация этой фичи)
-- [ ] Настройки количества последних сохранённых конфигов
+See [PRIVACY.md](PRIVACY.md) for full privacy policy.
