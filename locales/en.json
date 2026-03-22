@@ -1,0 +1,130 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "error": "Error",
+    "success": "Success",
+    "loading": "Loading...",
+    "copied": "Copied!",
+    "none": "none"
+  },
+  "search": {
+    "placeholder": "Search bookmarks…",
+    "currentTabOnly": "Only in current tab",
+    "clear": "Clear",
+    "found": "Found: {count} (in tab \"{title}\")",
+    "nothingFound": "Nothing found"
+  },
+  "settings": {
+    "title": "Settings",
+    "rootFolder": "Root Folder",
+    "globalSettings": "Global Settings",
+    "openInNewTab": "Open links in new tab",
+    "showLinksInTree": "Show links in navigator tree",
+    "fontSize": {
+      "tabs": "Tabs font size",
+      "nav": "Navigator font size",
+      "content": "Content font size"
+    },
+    "language": "Language",
+    "languageAuto": "Auto (browser language)"
+  },
+  "tabs": {
+    "main": "Main",
+    "create": "Create tab from folder",
+    "close": "Close tab",
+    "closeConfirm": "Close tab «{title}»?",
+    "pin": "Pin tab",
+    "unpin": "Unpin tab",
+    "color": "Tab color",
+    "noTabs": "No tabs",
+    "tabsList": "Tabs",
+    "createHint": "Tabs are created on the start page: Right-click on folder → «Create tab».",
+    "colors": {
+      "none": "No color",
+      "red": "Red",
+      "orange": "Orange",
+      "yellow": "Yellow",
+      "green": "Green",
+      "cyan": "Cyan",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink"
+    }
+  },
+  "bookmarks": {
+    "add": "Add bookmark",
+    "addFolder": "Add folder",
+    "renameFolder": "Rename folder",
+    "deleteFolder": "Delete folder",
+    "deleteFolderConfirm": "Delete folder «{title}»?",
+    "deleteFolderWithChildren": "It contains {count} item(s). All content will be deleted.",
+    "edit": "Edit bookmark",
+    "delete": "Delete bookmark",
+    "deleteConfirm": "Delete bookmark «{title}»?",
+    "title": "Title",
+    "url": "URL"
+  },
+  "folder": {
+    "notSelected": "Not selected",
+    "clickHint": "Click on folder to select",
+    "selected": "Selected",
+    "count": "{count} folders"
+  },
+  "export": {
+    "title": "Export / Import Configuration",
+    "hint": "Config is saved as a bookmark in «Other Bookmarks / BookmarksStartpage». Last 20 configs are kept.",
+    "save": "Save config",
+    "load": "Load config",
+    "copyUrl": "Copy URL",
+    "manual": "Manual export / import (text)",
+    "generate": "Generate",
+    "copy": "Copy",
+    "import": "Import",
+    "pasteHint": "Paste config string here…",
+    "confirmReplace": "Current config contains {count} tabs.\\nReplace with imported?",
+    "configNotFound": "Saved configs not found.",
+    "configFolder": "Folder «Other Bookmarks / BookmarksStartpage» is empty or doesn't exist.",
+    "loaded": "Configuration loaded",
+    "partialLoad": "Configuration loaded partially",
+    "loadError": "Configuration load error",
+    "date": "Config date",
+    "tabsCount": "Tabs: {imported}, settings applied",
+    "loadedPartial": "Loaded: {imported}, not found: {failed}",
+    "structureDiffers": "Bookmark structure differs from source",
+    "noneLoaded": "No folders from config were found",
+    "imported": "Imported: {count} tabs"
+  },
+  "status": {
+    "saved": "Saved!",
+    "settingsSaved": "Settings saved!",
+    "configSaved": "Config saved: {title}",
+    "exportError": "Export error: {message}",
+    "importError": "Import error: {message}",
+    "invalidFormat": "Invalid format",
+    "pasteConfig": "Paste config string",
+    "saving": "Saving…",
+    "loading": "Loading…"
+  },
+  "newtab": {
+    "emptyState": "No folder selected",
+    "openSettings": "Open settings"
+  },
+  "modal": {
+    "ok": "OK"
+  },
+  "view": {
+    "explorer": "Explorer",
+    "allLinks": "All links",
+    "dropHere": "Drop folder here",
+    "folderNotSelected": "No folder selected",
+    "openSettings": "Open settings",
+    "folderNotFound": "Error: folder not found",
+    "noBookmarks": "No bookmarks",
+    "emptyFolder": "Empty folder"
+  }
+}

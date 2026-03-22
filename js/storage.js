@@ -16,7 +16,8 @@ const Storage = {
       showLinksInTree: true,
       fontSizeTabs: 13,
       fontSizeNav: 13,
-      fontSizeContent: 13
+      fontSizeContent: 13,
+      language: null  // null = auto-detect on first run, 'en' or 'ru' for specific
     }
   },
 

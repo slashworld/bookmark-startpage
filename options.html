@@ -326,104 +326,114 @@
   </style>
 </head>
 <body>
-  <h1>⚙️ Bookmark Startpage</h1>
+  <h1 data-i18n="settings.title">⚙️ Bookmark Startpage</h1>
   <p class="hint">
-    Выберите папку из закладок для отображения на стартовой странице.
-    <a href="#" id="backLink" style="color:var(--accent);margin-left:8px;">← Назад</a>
+    <span data-i18n="folder.clickHint">Выберите папку из закладок для отображения на стартовой странице.</span>
+    <a href="#" id="backLink" style="color:var(--accent);margin-left:8px;" data-i18n="common.back">← Назад</a>
   </p>
 
   <div class="section">
-    <h2>📁 Корневая папка</h2>
+    <h2 data-i18n="settings.rootFolder">📁 Корневая папка</h2>
 
     <div class="selection-bar">
-      <span class="selection-bar__label">Выбрано:</span>
-      <span class="selection-bar__path" id="selectedPath">— не выбрана —</span>
+      <span class="selection-bar__label" data-i18n="folder.selected">Выбрано:</span>
+      <span class="selection-bar__path" id="selectedPath" data-i18n="folder.notSelected">— не выбрана —</span>
     </div>
 
     <div class="folder-picker">
       <div class="folder-picker__header">
-        <span>Кликните на папку для выбора</span>
+        <span data-i18n="folder.clickHint">Кликните на папку для выбора</span>
         <span id="folderCount"></span>
       </div>
       <div class="folder-picker__tree" id="treePicker">
-        <p style="color:var(--text-muted);padding:12px;font-size:13px;">Загрузка закладок…</p>
+        <p style="color:var(--text-muted);padding:12px;font-size:13px;" data-i18n="common.loading">Загрузка закладок…</p>
       </div>
     </div>
 
     <div class="btn-row">
-      <button class="primary" id="saveBtn" disabled>💾 Сохранить</button>
+      <button class="primary" id="saveBtn" disabled data-i18n="common.save">💾 Сохранить</button>
     </div>
     <div class="status-msg" id="saveStatus"></div>
   </div>
 
   <!-- Global Settings -->
   <div class="section">
-    <h2>🔧 Глобальные настройки</h2>
+    <h2 data-i18n="settings.globalSettings">🔧 Глобальные настройки</h2>
 
     <label class="setting-row">
       <input type="checkbox" id="openInNewTab" checked>
-      <span>Открывать ссылки в новой вкладке</span>
+      <span data-i18n="settings.openInNewTab">Открывать ссылки в новой вкладке</span>
     </label>
 
     <label class="setting-row">
       <input type="checkbox" id="showLinksInTree" checked>
-      <span>Отображать ссылки в дереве навигатора</span>
+      <span data-i18n="settings.showLinksInTree">Отображать ссылки в дереве навигатора</span>
     </label>
 
     <div class="setting-grid">
-      <span class="setting-grid__label">Размер шрифта табов:</span>
+      <span class="setting-grid__label" data-i18n="settings.fontSize.tabs">Размер шрифта табов:</span>
       <input type="range" id="fontSizeTabs" min="10" max="20" value="13" class="setting-grid__range">
       <span class="setting-grid__val" id="fontSizeTabsVal">13px</span>
 
-      <span class="setting-grid__label">Размер шрифта навигатора:</span>
+      <span class="setting-grid__label" data-i18n="settings.fontSize.nav">Размер шрифта навигатора:</span>
       <input type="range" id="fontSizeNav" min="10" max="20" value="13" class="setting-grid__range">
       <span class="setting-grid__val" id="fontSizeNavVal">13px</span>
 
-      <span class="setting-grid__label">Размер шрифта основной области:</span>
+      <span class="setting-grid__label" data-i18n="settings.fontSize.content">Размер шрифта основной области:</span>
       <input type="range" id="fontSizeContent" min="10" max="20" value="13" class="setting-grid__range">
       <span class="setting-grid__val" id="fontSizeContentVal">13px</span>
     </div>
 
+    <!-- Language Selector -->
+    <div class="setting-row" style="margin-top: 16px;">
+      <span data-i18n="settings.language">Язык:</span>
+      <select id="languageSelect">
+        <option value="auto" data-i18n="settings.languageAuto">Авто (язык браузера)</option>
+        <option value="en">English</option>
+        <option value="ru">Русский</option>
+      </select>
+    </div>
+
     <div class="btn-row">
-      <button class="primary" id="saveSettingsBtn">💾 Сохранить</button>
+      <button class="primary" id="saveSettingsBtn" data-i18n="common.save">💾 Сохранить</button>
     </div>
     <div class="status-msg" id="settingsStatus"></div>
   </div>
 
   <!-- Export / Import -->
   <div class="section">
-    <h2>🔗 Экспорт / Импорт конфигурации</h2>
-    <p class="hint">Конфиг сохраняется как закладка в папке «Другие закладки / BookmarksStartpage». Хранятся последние 20 конфигов.</p>
+    <h2 data-i18n="export.title">🔗 Экспорт / Импорт конфигурации</h2>
+    <p class="hint" data-i18n="export.hint">Конфиг сохраняется как закладка в папке «Другие закладки / BookmarksStartpage». Хранятся последние 20 конфигов.</p>
 
     <div class="btn-row" style="margin:12px 0;">
-      <button class="primary" id="configSaveBtn">💾 Сохранить конфиг</button>
-      <button class="primary" id="configLoadBtn">📂 Загрузить конфиг</button>
-      <button class="secondary" id="configCopyUrlBtn">🔗 Копировать URL</button>
+      <button class="primary" id="configSaveBtn" data-i18n="export.save">💾 Сохранить конфиг</button>
+      <button class="primary" id="configLoadBtn" data-i18n="export.load">📂 Загрузить конфиг</button>
+      <button class="secondary" id="configCopyUrlBtn" data-i18n="export.copyUrl">🔗 Копировать URL</button>
     </div>
     <div class="status-msg" id="configStatus"></div>
 
     <details class="config-details">
-      <summary>Ручной экспорт / импорт (текстом)</summary>
-      <h3 style="font-size:14px;color:var(--text);margin:12px 0 6px;">Экспорт</h3>
+      <summary data-i18n="export.manual">Ручной экспорт / импорт (текстом)</summary>
+      <h3 style="font-size:14px;color:var(--text);margin:12px 0 6px;" data-i18n="export.title">Экспорт</h3>
       <div class="btn-row">
-        <button class="secondary" id="exportBtn">Сгенерировать</button>
-        <button class="secondary" id="copyBtn" style="display:none;">📋 Копировать</button>
+        <button class="secondary" id="exportBtn" data-i18n="export.generate">Сгенерировать</button>
+        <button class="secondary" id="copyBtn" style="display:none;" data-i18n="export.copy">📋 Копировать</button>
       </div>
       <textarea class="export-url" id="exportStr" rows="3" style="display:none;" readonly></textarea>
 
-      <h3 style="font-size:14px;color:var(--text);margin:16px 0 6px;">Импорт</h3>
-      <textarea class="export-url" id="importStr" rows="3" placeholder="Вставьте строку конфига сюда…"></textarea>
+      <h3 style="font-size:14px;color:var(--text);margin:16px 0 6px;" data-i18n="export.import">Импорт</h3>
+      <textarea class="export-url" id="importStr" rows="3" data-i18n-placeholder="export.pasteHint" placeholder="Вставьте строку конфига сюда…"></textarea>
       <div class="btn-row" style="margin-top:8px;">
-        <button class="secondary" id="importBtn">📥 Импортировать</button>
+        <button class="secondary" id="importBtn" data-i18n="export.import">📥 Импортировать</button>
       </div>
       <div class="status-msg" id="importStatus"></div>
     </details>
   </div>
 
   <div class="section">
-    <h2>📑 Табы</h2>
+    <h2 data-i18n="tabs.tabsList">📑 Табы</h2>
     <div class="tabs-list" id="tabsList"></div>
-    <p class="hint" style="margin-top: 8px;">Табы создаются на стартовой странице: ПКМ на папку → «Создать таб».</p>
+    <p class="hint" style="margin-top: 8px;" data-i18n="tabs.createHint">Табы создаются на стартовой странице: ПКМ на папку → «Создать таб».</p>
   </div>
 
   <!-- Result modal -->
@@ -435,12 +445,13 @@
       </div>
       <div class="opts-modal__body" id="optsModalBody"></div>
       <div class="opts-modal__footer">
-        <button class="opts-modal__btn" id="optsModalOk">OK</button>
+        <button class="opts-modal__btn" id="optsModalOk" data-i18n="modal.ok">OK</button>
       </div>
     </div>
   </div>
 
   <script src="js/storage.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/bookmarks.js"></script>
   <script src="js/configstore.js"></script>
   <script src="js/options.js"></script>

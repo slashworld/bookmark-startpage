@@ -11,14 +11,15 @@
   <header class="topbar">
     <div class="topbar__search">
       <div class="filter-wrap">
-        <input type="text" id="filterInput" class="filter-wrap__input" placeholder="Поиск по закладкам…">
-        <button class="filter-wrap__clear" id="filterClear" hidden title="Очистить">✕</button>
+        <input type="text" id="filterInput" class="filter-wrap__input" data-i18n-placeholder="search.placeholder" placeholder="Поиск по закладкам…">
+        <button class="filter-wrap__clear" id="filterClear" hidden data-i18n-title="search.clear" title="Очистить">✕</button>
       </div>
       <label class="topbar__checkbox">
-        <input type="checkbox" id="filterCurrentTab"> только в текущем табе
+        <input type="checkbox" id="filterCurrentTab">
+        <span data-i18n="search.currentTabOnly">только в текущем табе</span>
       </label>
     </div>
-    <button class="topbar__gear" id="gearBtn" title="Настройки"><span>⚙️</span></button>
+    <button class="topbar__gear" id="gearBtn" data-i18n-title="settings.title" title="Настройки"><span>⚙️</span></button>
   </header>
 
   <!-- Tabs strip -->
@@ -27,8 +28,8 @@
   <!-- Main content area -->
   <main class="content" id="contentArea">
     <div class="content__empty" id="emptyState">
-      <p>Папка не выбрана.</p>
-      <button id="openSettings">Открыть настройки</button>
+      <p data-i18n="newtab.emptyState">Папка не выбрана.</p>
+      <button id="openSettings" data-i18n="newtab.openSettings">Открыть настройки</button>
     </div>
   </main>
 
@@ -36,7 +37,7 @@
   <footer class="bottom-bar">
     <label class="bottom-bar__toggle">
       <input type="checkbox" id="openInNewTab" checked>
-      <span>Открывать URL в новой вкладке</span>
+      <span data-i18n="settings.openInNewTab">Открывать URL в новой вкладке</span>
     </label>
   </footer>
 
@@ -52,13 +53,14 @@
       </div>
       <div class="modal__body" id="modalBody"></div>
       <div class="modal__footer">
-        <button class="modal__btn modal__btn--cancel" id="modalCancelBtn">Отмена</button>
-        <button class="modal__btn modal__btn--save" id="modalSaveBtn">Сохранить</button>
+        <button class="modal__btn modal__btn--cancel" id="modalCancelBtn" data-i18n="common.cancel">Отмена</button>
+        <button class="modal__btn modal__btn--save" id="modalSaveBtn" data-i18n="common.save">Сохранить</button>
       </div>
     </div>
   </div>
 
   <script src="js/storage.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/bookmarks.js"></script>
   <script src="js/configstore.js"></script>
   <script src="js/tabs.js"></script>
