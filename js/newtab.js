@@ -9,7 +9,8 @@
   
   // Handle config import from URL hash (#config=<base64>)
   if (location.hash.startsWith('#config=')) {
-    const base64 = location.hash.slice('#config='.length);
+    const encodedBase64 = location.hash.slice('#config='.length);
+    const base64 = decodeURIComponent(encodedBase64);
     const data = Storage.parseConfigString(base64);
     if (data) {
       const currentConfig = await Storage.load();
@@ -95,9 +96,12 @@ async function initGlobalSettings() {
 
 async function applyUrlImport(data) {
   const config = await Storage.load();
+  
+  // Import settings if present
   if (data.settings) {
     config.settings = { ...Storage.DEFAULT_CONFIG.settings, ...data.settings };
   }
+  
   if (data.rootPathInfo || data.rootPath) {
     const folder = await Bookmarks.findFolderByPath(data.rootPathInfo || data.rootPath);
     if (folder) config.rootFolderId = folder.id;

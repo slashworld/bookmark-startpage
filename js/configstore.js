@@ -5,7 +5,6 @@
 
 const CONFIG_FOLDER_NAME = 'BookmarksStartpage';
 const CONFIG_PREFIX = 'SavedConfigBMSP';
-const CONFIG_URL_PREFIX = 'data:application/x-bsp-config;base64,';
 const MAX_CONFIGS = 20;
 
 const ConfigStore = {
@@ -35,7 +34,9 @@ const ConfigStore = {
 
   async save() {
     const configStr = await Storage.exportToString();
-    const url = CONFIG_URL_PREFIX + configStr;
+    // Save full extension URL with config hash instead of data URL
+    // EncodeURIComponent needed for base64 special chars (+, /, =)
+    const url = chrome.runtime.getURL('newtab.html') + '#config=' + encodeURIComponent(configStr);
 
     const now = new Date();
     const ts = now.getFullYear().toString()
@@ -75,7 +76,18 @@ const ConfigStore = {
     if (configs.length === 0) return null;
 
     const newest = configs[0];
-    const base64 = newest.url.replace(CONFIG_URL_PREFIX, '');
+    let base64 = '';
+    
+    // Support both new URL format (newtab.html#config=<base64>) and old data URL format
+    if (newest.url.includes('#config=')) {
+      // New format: chrome-extension://<id>/newtab.html#config=<base64>
+      const hashPart = newest.url.split('#config=')[1];
+      base64 = decodeURIComponent(hashPart);
+    } else if (newest.url.includes('data:application/x-bsp-config;base64,')) {
+      // Old format: data:application/x-bsp-config;base64,<base64>
+      base64 = newest.url.replace('data:application/x-bsp-config;base64,', '');
+    }
+    
     const data = Storage.parseConfigString(base64);
     if (!data) return null;
 
