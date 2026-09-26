@@ -36,11 +36,11 @@ const Storage = {
   },
 
   /**
-   * Serialize config to portable base64 string.
+   * Serialize config to a structured JavaScript object.
    * Uses structured path info (fullPath + relativePath + topFolderIndex)
    * so import can handle different locale top-folder names.
    */
-  async exportToString() {
+  async exportData() {
     const config = await Storage.load();
     let rootPathInfo = null;
 
@@ -63,7 +63,7 @@ const Storage = {
       });
     }
 
-    const exportData = {
+    return {
       version: Storage.EXPORT_VERSION,
       rootPathInfo: rootPathInfo,
       // Legacy
@@ -71,7 +71,13 @@ const Storage = {
       tabs: tabsExport,
       settings: config.settings || Storage.DEFAULT_CONFIG.settings
     };
+  },
 
+  /**
+   * Serialize config to portable base64 string.
+   */
+  async exportToString() {
+    const exportData = await Storage.exportData();
     const json = JSON.stringify(exportData);
     return btoa(unescape(encodeURIComponent(json)));
   },

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2026-09-26
+
+### Added
+- JSON file export and import for settings and tabs
+- Clear and short button labels for backup destinations: «В закладки» / «В файл»
+
+### Fixed
+- Fixed `icon16.png` and `icon32.png` resolutions to exact declared sizes (16x16 and 32x32)
+
 ## [1.0.0] - 2026-03-22
 
 ### Added

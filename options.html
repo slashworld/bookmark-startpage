@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8">
   <title>Bookmark Startpage — Настройки</title>
@@ -29,9 +30,22 @@
       margin: 0 auto;
     }
 
-    h1 { font-size: 22px; margin-bottom: 8px; }
-    h2 { font-size: 16px; margin: 24px 0 12px; color: var(--accent); }
-    p.hint { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 16px;
+      margin: 24px 0 12px;
+      color: var(--accent);
+    }
+
+    p.hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
 
     .section {
       background: var(--bg-surface);
@@ -67,8 +81,13 @@
       padding: 8px;
     }
 
-    .fp-node { padding-left: 20px; }
-    .fp-node[data-depth="0"] { padding-left: 0; }
+    .fp-node {
+      padding-left: 20px;
+    }
+
+    .fp-node[data-depth="0"] {
+      padding-left: 0;
+    }
 
     .fp-row {
       display: flex;
@@ -82,14 +101,23 @@
       user-select: none;
     }
 
-    .fp-row:hover { background: var(--bg-hover); }
+    .fp-row:hover {
+      background: var(--bg-hover);
+    }
 
     .fp-row.selected {
       background: var(--accent);
       color: var(--bg);
     }
-    .fp-row.selected .fp-arrow { color: var(--bg); }
-    .fp-row.selected .fp-count { background: rgba(0,0,0,0.2); color: var(--bg); }
+
+    .fp-row.selected .fp-arrow {
+      color: var(--bg);
+    }
+
+    .fp-row.selected .fp-count {
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--bg);
+    }
 
     .fp-arrow {
       font-size: 10px;
@@ -99,11 +127,23 @@
       transition: transform 0.15s;
       flex-shrink: 0;
     }
-    .fp-arrow.expanded { transform: rotate(90deg); }
-    .fp-arrow.empty { visibility: hidden; }
 
-    .fp-icon { font-size: 15px; flex-shrink: 0; }
-    .fp-title { flex: 1; }
+    .fp-arrow.expanded {
+      transform: rotate(90deg);
+    }
+
+    .fp-arrow.empty {
+      visibility: hidden;
+    }
+
+    .fp-icon {
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .fp-title {
+      flex: 1;
+    }
 
     .fp-count {
       font-size: 11px;
@@ -113,8 +153,13 @@
       color: var(--text-muted);
     }
 
-    .fp-children { display: none; }
-    .fp-children.open { display: block; }
+    .fp-children {
+      display: none;
+    }
+
+    .fp-children.open {
+      display: block;
+    }
 
     /* Selection bar */
     .selection-bar {
@@ -129,8 +174,16 @@
       font-size: 13px;
     }
 
-    .selection-bar__label { color: var(--text-muted); flex-shrink: 0; }
-    .selection-bar__path { color: var(--accent); font-weight: 500; flex: 1; }
+    .selection-bar__label {
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .selection-bar__path {
+      color: var(--accent);
+      font-weight: 500;
+      flex: 1;
+    }
 
     button.primary {
       padding: 8px 20px;
@@ -142,8 +195,15 @@
       cursor: pointer;
       font-weight: 600;
     }
-    button.primary:hover { background: var(--accent-hover); }
-    button.primary:disabled { opacity: 0.4; cursor: default; }
+
+    button.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    button.primary:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
 
     button.secondary {
       padding: 8px 20px;
@@ -154,26 +214,57 @@
       font-size: 14px;
       cursor: pointer;
     }
-    button.secondary:hover { background: var(--bg-hover); }
 
-    .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+    button.secondary:hover {
+      background: var(--bg-hover);
+    }
 
-    .tabs-list { margin: 8px 0; }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tabs-list {
+      margin: 8px 0;
+    }
+
     .tabs-list-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px 10px; border-radius: 4px; font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 13px;
     }
-    .tabs-list-item:hover { background: var(--bg-hover); }
-    .tabs-list-item__title { flex: 1; }
+
+    .tabs-list-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .tabs-list-item__title {
+      flex: 1;
+    }
+
     .tabs-list-item__badge {
-      font-size: 11px; padding: 2px 6px;
-      background: var(--bg-active); border-radius: 3px; color: var(--text-muted);
+      font-size: 11px;
+      padding: 2px 6px;
+      background: var(--bg-active);
+      border-radius: 3px;
+      color: var(--text-muted);
     }
+
     .tabs-list-item__remove {
-      color: var(--danger); cursor: pointer;
-      background: none; border: none; font-size: 14px;
+      color: var(--danger);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 14px;
     }
-    .tabs-list-item__remove:hover { color: #ff6b8a; }
+
+    .tabs-list-item__remove:hover {
+      color: #ff6b8a;
+    }
 
     .export-url {
       width: 100%;
@@ -199,9 +290,24 @@
       margin-top: 8px;
       display: none;
     }
-    .status-msg.success { display: block; background: rgba(166,227,161,0.15); color: var(--success); }
-    .status-msg.error { display: block; background: rgba(243,139,168,0.15); color: var(--danger); }
-    .status-msg.warning { display: block; background: rgba(249,226,175,0.15); color: #f9e2af; }
+
+    .status-msg.success {
+      display: block;
+      background: rgba(166, 227, 161, 0.15);
+      color: var(--success);
+    }
+
+    .status-msg.error {
+      display: block;
+      background: rgba(243, 139, 168, 0.15);
+      color: var(--danger);
+    }
+
+    .status-msg.warning {
+      display: block;
+      background: rgba(249, 226, 175, 0.15);
+      color: #f9e2af;
+    }
 
     .import-log {
       margin-top: 8px;
@@ -220,6 +326,7 @@
       padding: 0 12px;
       overflow: hidden;
     }
+
     .config-details summary {
       padding: 10px 0;
       cursor: pointer;
@@ -227,30 +334,68 @@
       font-size: 13px;
       user-select: none;
     }
-    .config-details summary:hover { color: var(--text); }
-    .config-details[open] { padding-bottom: 12px; }
+
+    .config-details summary:hover {
+      color: var(--text);
+    }
+
+    .config-details[open] {
+      padding-bottom: 12px;
+    }
 
     /* Options modal */
     .opts-modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-      z-index: 2000; display: flex; align-items: center; justify-content: center;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .opts-modal-overlay[hidden] { display: none !important; }
+
+    .opts-modal-overlay[hidden] {
+      display: none !important;
+    }
+
     .opts-modal {
-      background: var(--bg-surface); border: 1px solid var(--border);
-      border-radius: 12px; width: 400px; max-width: 90vw;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 400px;
+      max-width: 90vw;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     }
+
     .opts-modal__header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px; border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
     }
-    .opts-modal__title { font-size: 15px; font-weight: 600; color: var(--text); }
+
+    .opts-modal__title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
     .opts-modal__close {
-      background: none; border: none; color: var(--text-muted);
-      font-size: 16px; cursor: pointer; padding: 2px 6px; border-radius: 4px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
-    .opts-modal__close:hover { color: var(--text); background: var(--bg-hover); }
+
+    .opts-modal__close:hover {
+      color: var(--text);
+      background: var(--bg-hover);
+    }
+
     .opts-modal__body {
       padding: 24px 16px;
       font-size: 13px;
@@ -258,33 +403,86 @@
       line-height: 1.7;
       text-align: center;
     }
+
     .opts-modal__body .result-status {
-      width: 48px; height: 48px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       margin: 0 auto 12px;
       font-size: 22px;
     }
-    .opts-modal__body .result-status--ok { background: rgba(166,227,161,0.15); color: var(--success); }
-    .opts-modal__body .result-status--warn { background: rgba(249,226,175,0.15); color: #f9e2af; }
-    .opts-modal__body .result-status--err { background: rgba(243,139,168,0.15); color: var(--danger); }
-    .opts-modal__body .result-date { color: var(--accent); font-weight: 600; }
-    .opts-modal__body .result-error { color: var(--danger); }
-    .opts-modal__body .result-detail { color: var(--text-muted); margin-top: 6px; font-size: 12px; }
+
+    .opts-modal__body .result-status--ok {
+      background: rgba(166, 227, 161, 0.15);
+      color: var(--success);
+    }
+
+    .opts-modal__body .result-status--warn {
+      background: rgba(249, 226, 175, 0.15);
+      color: #f9e2af;
+    }
+
+    .opts-modal__body .result-status--err {
+      background: rgba(243, 139, 168, 0.15);
+      color: var(--danger);
+    }
+
+    .opts-modal__body .result-date {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .opts-modal__body .result-error {
+      color: var(--danger);
+    }
+
+    .opts-modal__body .result-detail {
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
     .opts-modal__footer {
-      display: flex; justify-content: center; padding: 12px 16px;
+      display: flex;
+      justify-content: center;
+      padding: 12px 16px;
       border-top: 1px solid var(--border);
     }
-    .opts-modal__btn {
-      padding: 8px 32px; background: var(--accent); color: var(--bg);
-      border: none; border-radius: var(--radius); font-size: 13px;
-      cursor: pointer; font-weight: 500;
-    }
-    .opts-modal__btn:hover { background: var(--accent-hover); }
 
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    .opts-modal__btn {
+      padding: 8px 32px;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius);
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .opts-modal__btn:hover {
+      background: var(--accent-hover);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
 
     /* Settings controls */
     .setting-row {
@@ -295,7 +493,10 @@
       font-size: 13px;
       cursor: pointer;
     }
-    .setting-row input { accent-color: var(--accent); }
+
+    .setting-row input {
+      accent-color: var(--accent);
+    }
 
     .setting-grid {
       display: grid;
@@ -325,6 +526,7 @@
     }
   </style>
 </head>
+
 <body>
   <h1 data-i18n="settings.title">⚙️ Bookmark Startpage</h1>
   <p class="hint">
@@ -346,7 +548,8 @@
         <span id="folderCount"></span>
       </div>
       <div class="folder-picker__tree" id="treePicker">
-        <p style="color:var(--text-muted);padding:12px;font-size:13px;" data-i18n="common.loading">Загрузка закладок…</p>
+        <p style="color:var(--text-muted);padding:12px;font-size:13px;" data-i18n="common.loading">Загрузка закладок…
+        </p>
       </div>
     </div>
 
@@ -403,12 +606,16 @@
   <!-- Export / Import -->
   <div class="section">
     <h2 data-i18n="export.title">🔗 Экспорт / Импорт конфигурации</h2>
-    <p class="hint" data-i18n="export.hint">Конфиг сохраняется как закладка в папке «Другие закладки / BookmarksStartpage». Хранятся последние 20 конфигов.</p>
+    <p class="hint" data-i18n="export.hint">Конфиг сохраняется как закладка в папке «Другие закладки /
+      BookmarksStartpage». Хранятся последние 20 конфигов.</p>
 
-    <div class="btn-row" style="margin:12px 0;">
-      <button class="primary" id="configSaveBtn" data-i18n="export.save">💾 Сохранить конфиг</button>
-      <button class="primary" id="configLoadBtn" data-i18n="export.load">📂 Загрузить конфиг</button>
+    <div class="btn-row" style="margin:12px 0; flex-wrap: wrap;">
+      <button class="primary" id="configSaveBtn" data-i18n="export.save" data-i18n-title="export.saveBookmarksHint" title="Сохранить резервную копию в закладки Chrome">💾 В закладки</button>
+      <button class="primary" id="configLoadBtn" data-i18n="export.load" data-i18n-title="export.loadBookmarksHint" title="Восстановить резервную копию из закладок Chrome">📂 Из закладок</button>
+      <button class="secondary" id="configFileExportBtn" data-i18n="export.saveFile" data-i18n-title="export.saveFileHint" title="Экспорт конфигурации в JSON-файл">💾 В файл</button>
+      <button class="secondary" id="configFileImportBtn" data-i18n="export.loadFile" data-i18n-title="export.loadFileHint" title="Импорт конфигурации из JSON-файла">📂 Из файла</button>
       <button class="secondary" id="configCopyUrlBtn" data-i18n="export.copyUrl">🔗 Копировать URL</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none;">
     </div>
     <div class="status-msg" id="configStatus"></div>
 
@@ -422,7 +629,8 @@
       <textarea class="export-url" id="exportStr" rows="3" style="display:none;" readonly></textarea>
 
       <h3 style="font-size:14px;color:var(--text);margin:16px 0 6px;" data-i18n="export.import">Импорт</h3>
-      <textarea class="export-url" id="importStr" rows="3" data-i18n-placeholder="export.pasteHint" placeholder="Вставьте строку конфига сюда…"></textarea>
+      <textarea class="export-url" id="importStr" rows="3" data-i18n-placeholder="export.pasteHint"
+        placeholder="Вставьте строку конфига сюда…"></textarea>
       <div class="btn-row" style="margin-top:8px;">
         <button class="secondary" id="importBtn" data-i18n="export.import">📥 Импортировать</button>
       </div>
@@ -433,7 +641,8 @@
   <div class="section">
     <h2 data-i18n="tabs.tabsList">📑 Табы</h2>
     <div class="tabs-list" id="tabsList"></div>
-    <p class="hint" style="margin-top: 8px;" data-i18n="tabs.createHint">Табы создаются на стартовой странице: ПКМ на папку → «Создать таб».</p>
+    <p class="hint" style="margin-top: 8px;" data-i18n="tabs.createHint">Табы создаются на стартовой странице: ПКМ на
+      папку → «Создать таб».</p>
   </div>
 
   <!-- Result modal -->
@@ -456,4 +665,5 @@
   <script src="js/configstore.js"></script>
   <script src="js/options.js"></script>
 </body>
+
 </html>

@@ -7,19 +7,19 @@ let selectedFolderId = null;
 (async function init() {
   // Initialize i18n first
   await I18n.init();
-  
+
   setupBackLink();
 
   try {
     const config = await Storage.load();
     selectedFolderId = config.rootFolderId;
-    
+
     // Set language selector value
     const langSelect = document.getElementById('languageSelect');
     if (langSelect) {
       const currentLang = config.settings?.language || 'auto';
       langSelect.value = currentLang;
-      
+
       // Handle language change
       langSelect.addEventListener('change', async (e) => {
         const newLang = e.target.value;
@@ -42,7 +42,7 @@ let selectedFolderId = null;
       }
     }
 
-    document.getElementById('folderCount').textContent = I18n.t('folder.count', {count: folderCount});
+    document.getElementById('folderCount').textContent = I18n.t('folder.count', { count: folderCount });
     updateSelectionDisplay();
     renderTabsList(config.tabs || []);
 
@@ -64,7 +64,7 @@ let selectedFolderId = null;
 // === Back Link ===
 
 function setupBackLink() {
-  document.getElementById('backLink').addEventListener('click', function(e) {
+  document.getElementById('backLink').addEventListener('click', function (e) {
     e.preventDefault();
     window.location.href = chrome.runtime.getURL('newtab.html');
   });
@@ -109,9 +109,9 @@ function renderNode(container, node, depth) {
     row.appendChild(badge);
   }
 
-  row.addEventListener('click', function(e) {
+  row.addEventListener('click', function (e) {
     e.stopPropagation();
-    document.querySelectorAll('.fp-row.selected').forEach(function(r) { r.classList.remove('selected'); });
+    document.querySelectorAll('.fp-row.selected').forEach(function (r) { r.classList.remove('selected'); });
     row.classList.add('selected');
     selectedFolderId = node.id;
     document.getElementById('saveBtn').disabled = false;
@@ -161,7 +161,7 @@ async function updateSelectionDisplay() {
 
 // === Save Root Folder ===
 
-document.getElementById('saveBtn').addEventListener('click', async function() {
+document.getElementById('saveBtn').addEventListener('click', async function () {
   if (!selectedFolderId) return;
   const config = await Storage.load();
   config.rootFolderId = selectedFolderId;
@@ -224,9 +224,9 @@ function renderTabsList(tabs) {
       removeBtn.className = 'tabs-list-item__remove';
       removeBtn.textContent = '✕';
       removeBtn.title = I18n.t('tabs.close');
-      removeBtn.addEventListener('click', async function() {
+      removeBtn.addEventListener('click', async function () {
         const cfg = await Storage.load();
-        cfg.tabs = cfg.tabs.filter(function(t) { return t.id !== tab.id; });
+        cfg.tabs = cfg.tabs.filter(function (t) { return t.id !== tab.id; });
         await Storage.save(cfg);
         renderTabsList(cfg.tabs);
       });
@@ -239,7 +239,7 @@ function renderTabsList(tabs) {
 
 // === Global Settings ===
 
-document.getElementById('saveSettingsBtn').addEventListener('click', async function() {
+document.getElementById('saveSettingsBtn').addEventListener('click', async function () {
   const config = await Storage.load();
   if (!config.settings) config.settings = {};
 
@@ -248,7 +248,7 @@ document.getElementById('saveSettingsBtn').addEventListener('click', async funct
   config.settings.fontSizeTabs = parseInt(document.getElementById('fontSizeTabs').value) || 13;
   config.settings.fontSizeNav = parseInt(document.getElementById('fontSizeNav').value) || 13;
   config.settings.fontSizeContent = parseInt(document.getElementById('fontSizeContent').value) || 13;
-  
+
   // Save language setting
   const langSelect = document.getElementById('languageSelect');
   if (langSelect) {
@@ -271,14 +271,14 @@ function updateFontLabels() {
 
 // === Config Save Button ===
 
-document.getElementById('configSaveBtn').addEventListener('click', async function() {
+document.getElementById('configSaveBtn').addEventListener('click', async function () {
   const btn = this;
   btn.disabled = true;
   btn.textContent = '⏳ ' + I18n.t('status.saving');
 
   try {
     const result = await ConfigStore.save();
-    showStatus('configStatus', '✓ ' + I18n.t('status.configSaved', {title: result.title}), 'success');
+    showStatus('configStatus', '✓ ' + I18n.t('status.configSaved', { title: result.title }), 'success');
     AutoSave.reset(); // just saved manually, reset timer
   } catch (e) {
     console.error('Config save error:', e);
@@ -291,7 +291,7 @@ document.getElementById('configSaveBtn').addEventListener('click', async functio
 
 // === Config Copy URL Button ===
 
-document.getElementById('configCopyUrlBtn').addEventListener('click', async function() {
+document.getElementById('configCopyUrlBtn').addEventListener('click', async function () {
   const btn = this;
   btn.disabled = true;
   try {
@@ -309,11 +309,11 @@ document.getElementById('configCopyUrlBtn').addEventListener('click', async func
 
 // === Config Load Button ===
 
-document.getElementById('configLoadBtn').addEventListener('click', async function() {
+document.getElementById('configLoadBtn').addEventListener('click', async function () {
   // 4. Confirm if current config is not empty
   const currentConfig = await Storage.load();
   if (currentConfig.tabs && currentConfig.tabs.length > 0) {
-    if (!confirm(I18n.t('export.confirmReplace', {count: currentConfig.tabs.length}))) {
+    if (!confirm(I18n.t('export.confirmReplace', { count: currentConfig.tabs.length }))) {
       return;
     }
   }
@@ -344,17 +344,17 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
         '<div class="result-status result-status--ok">✓</div>' +
         '<p>' + I18n.t('export.loaded') + '</p>' +
         '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
-        '<p class="result-detail">' + I18n.t('export.tabsCount', {imported: importResult.imported}) + '</p>',
-        function() { location.reload(); }
+        '<p class="result-detail">' + I18n.t('export.tabsCount', { imported: importResult.imported }) + '</p>',
+        function () { location.reload(); }
       );
     } else if (importResult.imported > 0) {
       OptsModal.show(I18n.t('export.partialLoad'),
         '<div class="result-status result-status--warn">!</div>' +
         '<p>' + I18n.t('export.partialLoad') + '</p>' +
         '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
-        '<p class="result-detail">' + I18n.t('export.loadedPartial', {imported: importResult.imported, failed: importResult.failed}) + '</p>' +
+        '<p class="result-detail">' + I18n.t('export.loadedPartial', { imported: importResult.imported, failed: importResult.failed }) + '</p>' +
         '<p class="result-detail">' + I18n.t('export.structureDiffers') + '</p>',
-        function() { location.reload(); }
+        function () { location.reload(); }
       );
     } else {
       OptsModal.show(I18n.t('export.loadError'),
@@ -375,6 +375,131 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
     btn.textContent = '📂 ' + I18n.t('export.load');
   }
 });
+
+// === Config Export to File Button ===
+
+document.getElementById('configFileExportBtn').addEventListener('click', async function() {
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = '⏳ ' + I18n.t('status.saving');
+
+  try {
+    const data = await Storage.exportData();
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    a.download = `bookmark-startpage-config-${dateStr}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showStatus('configStatus', '✓ ' + I18n.t('export.fileExported'), 'success');
+  } catch (e) {
+    console.error('File export error:', e);
+    showStatus('configStatus', '✕ ' + I18n.t('common.error') + ': ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '💾 ' + I18n.t('export.saveFile');
+  }
+});
+
+// === Config Import from File Button ===
+
+const fileInput = document.getElementById('importFileInput');
+
+document.getElementById('configFileImportBtn').addEventListener('click', async function() {
+  if (typeof window.showOpenFilePicker === 'function') {
+    try {
+      const [fileHandle] = await window.showOpenFilePicker({
+        types: [{
+          description: '*.json',
+          accept: {
+            'application/json': ['.json']
+          }
+        }],
+        multiple: false
+      });
+      const file = await fileHandle.getFile();
+      await processConfigFile(file);
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn('showOpenFilePicker failed, falling back to input:', err);
+    }
+  }
+
+  fileInput.value = '';
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', async function(e) {
+  const file = e.target.files && e.target.files[0];
+  if (file) await processConfigFile(file);
+});
+
+async function processConfigFile(file) {
+  try {
+    const text = await file.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = Storage.parseConfigString(text);
+    }
+
+    if (!data || typeof data !== 'object') {
+      OptsModal.show(I18n.t('common.error'),
+        '<div class="result-status result-status--err">✕</div>' +
+        '<p class="result-error">' + I18n.t('status.invalidFormat') + '</p>'
+      );
+      return;
+    }
+
+    const currentConfig = await Storage.load();
+    if (currentConfig.tabs && currentConfig.tabs.length > 0) {
+      if (!confirm(I18n.t('export.confirmReplace', { count: currentConfig.tabs.length }))) {
+        return;
+      }
+    }
+
+    const importResult = await applyImportedConfig(data);
+    const dateStr = file.name;
+
+    if (importResult.failed === 0) {
+      OptsModal.show(I18n.t('export.loaded'),
+        '<div class="result-status result-status--ok">✓</div>' +
+        '<p>' + I18n.t('export.loaded') + '</p>' +
+        '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
+        '<p class="result-detail">' + I18n.t('export.tabsCount', { imported: importResult.imported }) + '</p>',
+        function() { location.reload(); }
+      );
+    } else if (importResult.imported > 0) {
+      OptsModal.show(I18n.t('export.partialLoad'),
+        '<div class="result-status result-status--warn">!</div>' +
+        '<p>' + I18n.t('export.partialLoad') + '</p>' +
+        '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
+        '<p class="result-detail">' + I18n.t('export.loadedPartial', { imported: importResult.imported, failed: importResult.failed }) + '</p>' +
+        '<p class="result-detail">' + I18n.t('export.structureDiffers') + '</p>',
+        function() { location.reload(); }
+      );
+    } else {
+      OptsModal.show(I18n.t('export.loadError'),
+        '<div class="result-status result-status--err">✕</div>' +
+        '<p>' + I18n.t('export.noneLoaded') + '</p>' +
+        '<p class="result-detail">' + I18n.t('export.structureDiffers') + '</p>'
+      );
+    }
+  } catch (err) {
+    console.error('File import error:', err);
+    OptsModal.show(I18n.t('common.error'),
+      '<div class="result-status result-status--err">✕</div>' +
+      '<p class="result-error">' + err.message + '</p>'
+    );
+  }
+}
 
 /**
  * Apply imported config and return { imported, failed } counts.
@@ -426,7 +551,7 @@ async function applyImportedConfig(data) {
 
 // ==================== Text Export (fallback) ====================
 
-document.getElementById('exportBtn').addEventListener('click', async function() {
+document.getElementById('exportBtn').addEventListener('click', async function () {
   try {
     const str = await Storage.exportToString();
     const textarea = document.getElementById('exportStr');
@@ -435,23 +560,23 @@ document.getElementById('exportBtn').addEventListener('click', async function() 
     document.getElementById('copyBtn').style.display = '';
   } catch (e) {
     console.error('Export error:', e);
-    alert(I18n.t('status.exportError', {message: e.message}));
+    alert(I18n.t('status.exportError', { message: e.message }));
   }
 });
 
-document.getElementById('copyBtn').addEventListener('click', function() {
+document.getElementById('copyBtn').addEventListener('click', function () {
   const textarea = document.getElementById('exportStr');
   textarea.select();
-  navigator.clipboard.writeText(textarea.value).then(function() {
+  navigator.clipboard.writeText(textarea.value).then(function () {
     var btn = document.getElementById('copyBtn');
     btn.textContent = '✓ ' + I18n.t('common.copied');
-    setTimeout(function() { btn.textContent = '📋 ' + I18n.t('export.copy'); }, 2000);
+    setTimeout(function () { btn.textContent = '📋 ' + I18n.t('export.copy'); }, 2000);
   });
 });
 
 // ==================== Text Import (fallback) ====================
 
-document.getElementById('importBtn').addEventListener('click', async function() {
+document.getElementById('importBtn').addEventListener('click', async function () {
   const str = document.getElementById('importStr').value.trim();
   if (!str) {
     showStatus('importStatus', I18n.t('status.pasteConfig'), 'error');
@@ -467,7 +592,7 @@ document.getElementById('importBtn').addEventListener('click', async function() 
   // Confirm if current config is not empty
   const currentConfig = await Storage.load();
   if (currentConfig.tabs && currentConfig.tabs.length > 0) {
-    if (!confirm(I18n.t('export.confirmReplace', {count: currentConfig.tabs.length}))) {
+    if (!confirm(I18n.t('export.confirmReplace', { count: currentConfig.tabs.length }))) {
       return;
     }
   }
@@ -475,14 +600,14 @@ document.getElementById('importBtn').addEventListener('click', async function() 
   try {
     const result = await applyImportedConfig(data);
     if (result.failed === 0) {
-      showStatus('importStatus', '✓ ' + I18n.t('export.imported', {count: result.imported}), 'success');
+      showStatus('importStatus', '✓ ' + I18n.t('export.imported', { count: result.imported }), 'success');
     } else {
-      showStatus('importStatus', '⚠ ' + I18n.t('status.importError', {message: result.imported + ' OK, ' + result.failed + ' not found'}), 'warning');
+      showStatus('importStatus', '⚠ ' + I18n.t('status.importError', { message: result.imported + ' OK, ' + result.failed + ' not found' }), 'warning');
     }
-    setTimeout(function() { location.reload(); }, 2000);
+    setTimeout(function () { location.reload(); }, 2000);
   } catch (e) {
     console.error('Import error:', e);
-    showStatus('importStatus', '✕ ' + I18n.t('status.importError', {message: e.message}), 'error');
+    showStatus('importStatus', '✕ ' + I18n.t('status.importError', { message: e.message }), 'error');
   }
 });
 
@@ -525,6 +650,6 @@ function showStatus(id, text, type) {
   el.textContent = text;
   el.className = 'status-msg ' + type;
   if (type !== 'error') {
-    setTimeout(function() { el.className = 'status-msg'; }, 5000);
+    setTimeout(function () { el.className = 'status-msg'; }, 5000);
   }
 }
