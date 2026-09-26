@@ -60,7 +60,14 @@ document.addEventListener('visibilitychange', () => {
   // Initialize i18n first
   await I18n.init();
   I18n.setupSync(); // Enable language sync across tabs
-  
+
+  // Auto-restore saved config from bookmarks on fresh install / empty state
+  try {
+    await ConfigStore.autoRestoreIfEmpty();
+  } catch (e) {
+    console.warn('[newtab] Auto-restore check failed:', e);
+  }
+
   // Handle config import from URL hash (initial load)
   // Delay slightly to allow page to become active
   setTimeout(() => handleConfigImport(false), 100);
@@ -74,6 +81,10 @@ document.addEventListener('visibilitychange', () => {
   Filter.init();
   await initGlobalSettings();
   await Render.renderAll();
+
+  // If still empty (e.g. bookmarks are still syncing in the background after fresh sign-in),
+  // listen for incoming bookmarks and auto-restore once config bookmark arrives
+  setupSyncListener();
 
   // Filter clear button
   const filterInput = document.getElementById('filterInput');
@@ -125,6 +136,33 @@ document.addEventListener('visibilitychange', () => {
   });
 })();
 
+let _syncListenerAttached = false;
+function setupSyncListener() {
+  if (_syncListenerAttached || typeof chrome === 'undefined' || !chrome.bookmarks?.onCreated) return;
+  _syncListenerAttached = true;
+
+  const onBookmarkCreated = async (id, node) => {
+    const cfg = await Storage.load();
+    if ((cfg.tabs && cfg.tabs.length > 0) || cfg.rootFolderId) {
+      chrome.bookmarks.onCreated.removeListener(onBookmarkCreated);
+      return;
+    }
+
+    const title = node?.title || '';
+    if (title.startsWith(CONFIG_PREFIX) || title === CONFIG_FOLDER_NAME) {
+      const restored = await ConfigStore.autoRestoreIfEmpty();
+      if (restored) {
+        chrome.bookmarks.onCreated.removeListener(onBookmarkCreated);
+        await Tabs.init();
+        await initGlobalSettings();
+        await Render.renderAll();
+      }
+    }
+  };
+
+  chrome.bookmarks.onCreated.addListener(onBookmarkCreated);
+}
+
 function openOptionsPage() {
   window.location.href = chrome.runtime.getURL('options.html');
 }
@@ -136,30 +174,5 @@ async function initGlobalSettings() {
 }
 
 async function applyUrlImport(data) {
-  const config = await Storage.load();
-  
-  // Import settings if present
-  if (data.settings) {
-    config.settings = { ...Storage.DEFAULT_CONFIG.settings, ...data.settings };
-  }
-  
-  if (data.rootPathInfo || data.rootPath) {
-    const folder = await Bookmarks.findFolderByPath(data.rootPathInfo || data.rootPath);
-    if (folder) config.rootFolderId = folder.id;
-  }
-  if (data.tabs && data.tabs.length > 0) {
-    config.tabs = [];
-    for (const td of data.tabs) {
-      const folder = await Bookmarks.findFolderByPath(td.pathInfo || td.folderPath);
-      if (folder) {
-        config.tabs.push({
-          id: Storage.generateTabId(), title: td.title,
-          bookmarkFolderId: folder.id, pinned: td.pinned || false,
-          order: td.order || config.tabs.length,
-          color: td.color || null, viewMode: td.viewMode || 'explorer'
-        });
-      }
-    }
-  }
-  await Storage.save(config);
+  await ConfigStore.applyConfig(data);
 }

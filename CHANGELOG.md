@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - JSON file export and import for settings and tabs
 - Clear and short button labels for backup destinations: «В закладки» / «В файл»
+- Automatic config restoration from synced bookmarks on fresh install (silent background restore)
 
 ### Fixed
 - Fixed `icon16.png` and `icon32.png` resolutions to exact declared sizes (16x16 and 32x32)

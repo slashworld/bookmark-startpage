@@ -8,7 +8,33 @@ const CONFIG_PREFIX = 'SavedConfigBMSP';
 const MAX_CONFIGS = 20;
 
 const ConfigStore = {
+  async findConfigFolder() {
+    try {
+      const tree = (await Bookmarks.getTree())[0];
+      if (tree.children && tree.children.length >= 2) {
+        const otherBookmarks = tree.children[1];
+        const otherFull = await Bookmarks.getSubTree(otherBookmarks.id);
+        const configFolder = (otherFull.children || []).find(
+          c => !c.url && c.title === CONFIG_FOLDER_NAME
+        );
+        if (configFolder) return configFolder;
+      }
+    } catch {}
+
+    // Fallback: search anywhere across bookmarks
+    try {
+      const results = await Bookmarks.search(CONFIG_FOLDER_NAME);
+      const folder = results.find(r => !r.url && r.title === CONFIG_FOLDER_NAME);
+      if (folder) return folder;
+    } catch {}
+
+    return null;
+  },
+
   async getConfigFolder() {
+    let folder = await ConfigStore.findConfigFolder();
+    if (folder) return folder;
+
     const tree = (await Bookmarks.getTree())[0];
     let otherBookmarks = null;
     if (tree.children && tree.children.length >= 2) {
@@ -18,18 +44,10 @@ const ConfigStore = {
       throw new Error('Unable to find "Other Bookmarks" folder');
     }
 
-    const otherFull = await Bookmarks.getSubTree(otherBookmarks.id);
-    let configFolder = (otherFull.children || []).find(
-      c => !c.url && c.title === CONFIG_FOLDER_NAME
-    );
-
-    if (!configFolder) {
-      configFolder = await Bookmarks.create({
-        parentId: otherBookmarks.id,
-        title: CONFIG_FOLDER_NAME
-      });
-    }
-    return configFolder;
+    return await Bookmarks.create({
+      parentId: otherBookmarks.id,
+      title: CONFIG_FOLDER_NAME
+    });
   },
 
   async save() {
@@ -63,7 +81,8 @@ const ConfigStore = {
   async load() {
     let folder;
     try {
-      folder = await ConfigStore.getConfigFolder();
+      folder = await ConfigStore.findConfigFolder();
+      if (!folder) return null;
     } catch {
       return null;
     }
@@ -95,6 +114,81 @@ const ConfigStore = {
     const timestamp = ConfigStore._parseTimestamp(tsStr);
 
     return { data, title: newest.title, timestamp };
+  },
+
+  /**
+   * Apply imported config object to storage.
+   * Matches folders by structured path cross-locale.
+   * Shared between newtab.js and options.js.
+   */
+  async applyConfig(data) {
+    const config = await Storage.load();
+    let imported = 0;
+    let failed = 0;
+
+    if (data.settings) {
+      config.settings = { ...Storage.DEFAULT_CONFIG.settings, ...data.settings };
+    }
+
+    if (data.rootPathInfo || data.rootPath) {
+      const searchTarget = data.rootPathInfo || data.rootPath;
+      const rootFolder = await Bookmarks.findFolderByPath(searchTarget);
+      if (rootFolder) {
+        config.rootFolderId = rootFolder.id;
+      } else {
+        failed++;
+      }
+    }
+
+    if (data.tabs && data.tabs.length > 0) {
+      config.tabs = [];
+      for (const tabData of data.tabs) {
+        const searchTarget = tabData.pathInfo || tabData.folderPath;
+        const folder = await Bookmarks.findFolderByPath(searchTarget);
+        if (folder) {
+          config.tabs.push({
+            id: Storage.generateTabId(),
+            title: tabData.title,
+            bookmarkFolderId: folder.id,
+            pinned: tabData.pinned || false,
+            order: tabData.order !== undefined ? tabData.order : config.tabs.length,
+            color: tabData.color || null,
+            viewMode: tabData.viewMode || 'explorer'
+          });
+          imported++;
+        } else {
+          failed++;
+        }
+      }
+    }
+
+    await Storage.save(config);
+    return { imported, failed };
+  },
+
+  /**
+   * Automatically restore config from bookmark backup on fresh install or empty state.
+   * No user confirmation needed.
+   */
+  async autoRestoreIfEmpty() {
+    const config = await Storage.load();
+    const hasTabs = config.tabs && config.tabs.length > 0;
+    const hasRoot = !!config.rootFolderId;
+    if (hasTabs || hasRoot) return false;
+
+    try {
+      const saved = await ConfigStore.load();
+      if (!saved || !saved.data) return false;
+
+      const res = await ConfigStore.applyConfig(saved.data);
+      if (res.imported > 0 || config.rootFolderId) {
+        console.log('[ConfigStore] Auto-restored config from bookmark backup:', saved.title);
+        return true;
+      }
+    } catch (e) {
+      console.warn('[ConfigStore] Auto-restore error:', e);
+    }
+    return false;
   },
 
   async _cleanup(folderId) {

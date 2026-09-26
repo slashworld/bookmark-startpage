@@ -11,6 +11,7 @@ let selectedFolderId = null;
   setupBackLink();
 
   try {
+    await ConfigStore.autoRestoreIfEmpty();
     const config = await Storage.load();
     selectedFolderId = config.rootFolderId;
 
@@ -505,48 +506,7 @@ async function processConfigFile(file) {
  * Apply imported config and return { imported, failed } counts.
  */
 async function applyImportedConfig(data) {
-  const config = await Storage.load();
-  let imported = 0;
-  let failed = 0;
-
-  if (data.settings) {
-    config.settings = { ...Storage.DEFAULT_CONFIG.settings, ...data.settings };
-  }
-
-  if (data.rootPathInfo || data.rootPath) {
-    const searchTarget = data.rootPathInfo || data.rootPath;
-    const rootFolder = await Bookmarks.findFolderByPath(searchTarget);
-    if (rootFolder) {
-      config.rootFolderId = rootFolder.id;
-    } else {
-      failed++;
-    }
-  }
-
-  if (data.tabs && data.tabs.length > 0) {
-    config.tabs = [];
-    for (const tabData of data.tabs) {
-      const searchTarget = tabData.pathInfo || tabData.folderPath;
-      const folder = await Bookmarks.findFolderByPath(searchTarget);
-      if (folder) {
-        config.tabs.push({
-          id: Storage.generateTabId(),
-          title: tabData.title,
-          bookmarkFolderId: folder.id,
-          pinned: tabData.pinned || false,
-          order: tabData.order || config.tabs.length,
-          color: tabData.color || null,
-          viewMode: tabData.viewMode || 'explorer'
-        });
-        imported++;
-      } else {
-        failed++;
-      }
-    }
-  }
-
-  await Storage.save(config);
-  return { imported, failed };
+  return await ConfigStore.applyConfig(data);
 }
 
 // ==================== Text Export (fallback) ====================

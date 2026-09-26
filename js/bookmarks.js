@@ -39,6 +39,15 @@ const Bookmarks = {
     });
   },
 
+  async search(query) {
+    return new Promise((resolve, reject) => {
+      chrome.bookmarks.search(query, (results) => {
+        if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
+        else resolve(results || []);
+      });
+    });
+  },
+
   isFolder(node) { return !node.url; },
 
   hasSubFolders(node) {
