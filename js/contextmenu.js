@@ -275,10 +275,6 @@ const Modal = {
     document.getElementById('modalCloseBtn').addEventListener('click', () => Modal.close());
     document.getElementById('modalCancelBtn').addEventListener('click', () => Modal.close());
     document.getElementById('modalSaveBtn').addEventListener('click', () => Modal.save());
-    // Close on overlay click
-    document.getElementById('modalOverlay').addEventListener('click', (e) => {
-      if (e.target.id === 'modalOverlay') Modal.close();
-    });
   },
 
   open({ title, fields, onSave }) {

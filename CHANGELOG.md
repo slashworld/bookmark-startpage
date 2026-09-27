@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Fixed view mode toggle («Explorer» / «All links»): now always available for any folder/tab, even without subfolders
 - Added empty states with quick action buttons and right-click context menus for empty folders and flat views
 - Improved visibility and borders for inactive tabs without an assigned color
+- Fixed modal editor behavior: clicking outside the modal dialog no longer closes it
 
 ## [1.0.0] - 2026-03-22
 
