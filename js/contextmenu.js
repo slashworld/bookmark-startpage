@@ -75,7 +75,12 @@ const ContextMenu = {
     ContextMenu.currentType = 'tab';
 
     const pinLabel = tab.pinned ? '📌 ' + I18n.t('tabs.unpin') : '📌 ' + I18n.t('tabs.pin');
-    let html = `<button class="ctx-menu__item" data-action="toggle-pin">${pinLabel}</button>`;
+    let html = `
+      <button class="ctx-menu__item" data-action="tab-add-bookmark">➕ ${I18n.t('bookmarks.add')}</button>
+      <button class="ctx-menu__item" data-action="tab-add-folder">📁 ${I18n.t('bookmarks.addFolder')}</button>
+      <div class="ctx-menu__separator"></div>
+      <button class="ctx-menu__item" data-action="toggle-pin">${pinLabel}</button>
+    `;
     if (!tab.pinned) {
       html += `<button class="ctx-menu__item" data-action="close-tab">✕ ${I18n.t('tabs.close')}</button>`;
     }
@@ -97,6 +102,37 @@ const ContextMenu = {
     html += `</div>`;
     ContextMenu.menu.innerHTML = html;
     ContextMenu.show(event.clientX, event.clientY);
+  },
+
+  openAddBookmarkModal(folderOrId) {
+    const parentId = (folderOrId && typeof folderOrId === 'object') ? folderOrId.id : folderOrId;
+    if (!parentId) return;
+    Modal.open({
+      title: I18n.t('bookmarks.add'),
+      fields: [
+        { id: 'title', label: I18n.t('bookmarks.title'), value: '' },
+        { id: 'url', label: I18n.t('bookmarks.url'), value: 'https://', type: 'url' }
+      ],
+      onSave: async (vals) => {
+        if (!vals.title.trim() || !vals.url.trim()) return;
+        await Bookmarks.create({ parentId, title: vals.title.trim(), url: vals.url.trim() });
+        await Render.renderAll();
+      }
+    });
+  },
+
+  openAddFolderModal(folderOrId) {
+    const parentId = (folderOrId && typeof folderOrId === 'object') ? folderOrId.id : folderOrId;
+    if (!parentId) return;
+    Modal.open({
+      title: I18n.t('bookmarks.addFolder'),
+      fields: [{ id: 'title', label: I18n.t('bookmarks.title'), value: '' }],
+      onSave: async (vals) => {
+        if (!vals.title.trim()) return;
+        await Bookmarks.create({ parentId, title: vals.title.trim() });
+        await Render.renderAll();
+      }
+    });
   },
 
   show(x, y) {
@@ -123,6 +159,16 @@ const ContextMenu = {
 
     switch (action) {
       // --- Tab actions ---
+      case 'tab-add-bookmark':
+        if (target && target.bookmarkFolderId) {
+          ContextMenu.openAddBookmarkModal(target.bookmarkFolderId);
+        }
+        break;
+      case 'tab-add-folder':
+        if (target && target.bookmarkFolderId) {
+          ContextMenu.openAddFolderModal(target.bookmarkFolderId);
+        }
+        break;
       case 'create-tab':
         if (target && ContextMenu.currentType === 'folder') {
           await Tabs.addTab(target.id, target.title);
@@ -172,32 +218,13 @@ const ContextMenu = {
 
       case 'add-bookmark':
         if (target) {
-          Modal.open({
-            title: I18n.t('bookmarks.add'),
-            fields: [
-              { id: 'title', label: I18n.t('bookmarks.title'), value: '' },
-              { id: 'url', label: I18n.t('bookmarks.url'), value: 'https://', type: 'url' }
-            ],
-            onSave: async (vals) => {
-              if (!vals.title.trim() || !vals.url.trim()) return;
-              await Bookmarks.create({ parentId: target.id, title: vals.title.trim(), url: vals.url.trim() });
-              await Render.renderAll();
-            }
-          });
+          ContextMenu.openAddBookmarkModal(target);
         }
         break;
 
       case 'add-folder':
         if (target) {
-          Modal.open({
-            title: I18n.t('bookmarks.addFolder'),
-            fields: [{ id: 'title', label: I18n.t('bookmarks.title'), value: '' }],
-            onSave: async (vals) => {
-              if (!vals.title.trim()) return;
-              await Bookmarks.create({ parentId: target.id, title: vals.title.trim() });
-              await Render.renderAll();
-            }
-          });
+          ContextMenu.openAddFolderModal(target);
         }
         break;
 

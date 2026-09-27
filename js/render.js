@@ -4,6 +4,8 @@
 
 const Render = {
   _settings: null,
+  activeFolderId: null,
+  currentExplorerNode: null,
 
   async renderAll() {
     await Render.loadSettings();
@@ -88,6 +90,9 @@ const Render = {
 
       // Left click — activate (synchronous, no storage event loop)
       btn.addEventListener('click', async () => {
+        if (Tabs.activeTabId !== tab.id) {
+          Render.activeFolderId = null;
+        }
         Tabs.activate(tab.id);  // synchronous set + fire-and-forget save
         await Render.renderAll();
       });
@@ -156,7 +161,6 @@ const Render = {
 
     try {
       const folderNode = await Bookmarks.getSubTree(activeTab.bookmarkFolderId);
-      const hasSubFolders = Bookmarks.hasSubFolders(folderNode);
       const viewMode = activeTab.viewMode || 'explorer';
 
       area.innerHTML = '';
@@ -167,11 +171,10 @@ const Render = {
       document.documentElement.style.setProperty('--font-size-nav', st.fontSizeNav + 'px');
       document.documentElement.style.setProperty('--font-size-content', st.fontSizeContent + 'px');
 
-      if (hasSubFolders) {
-        area.appendChild(Render.createViewToggle(viewMode, activeTab.id));
-      }
+      // Always show view toggle & action toolbar for any folder
+      area.appendChild(Render.createViewToggle(viewMode, activeTab.id, folderNode));
 
-      if (viewMode === 'flat' || !hasSubFolders) {
+      if (viewMode === 'flat') {
         area.appendChild(Render.createGroupedBookmarksList(folderNode));
       } else {
         area.appendChild(Render.createExplorerView(folderNode));
@@ -182,9 +185,12 @@ const Render = {
     }
   },
 
-  createViewToggle(currentMode, tabId) {
+  createViewToggle(currentMode, tabId, folderNode) {
     const div = document.createElement('div');
     div.className = 'view-toggle';
+
+    const modes = document.createElement('div');
+    modes.className = 'view-toggle__modes';
 
     ['explorer', 'flat'].forEach(mode => {
       const btn = document.createElement('button');
@@ -196,25 +202,88 @@ const Render = {
         if (tab) tab.viewMode = mode;
         await Render.renderContent();
       });
-      div.appendChild(btn);
+      modes.appendChild(btn);
     });
+    div.appendChild(modes);
+
+    const actions = document.createElement('div');
+    actions.className = 'view-toggle__actions';
+
+    const addBmBtn = document.createElement('button');
+    addBmBtn.className = 'view-toggle__action-btn';
+    addBmBtn.textContent = '➕ ' + I18n.t('bookmarks.add');
+    addBmBtn.title = I18n.t('bookmarks.add');
+    addBmBtn.addEventListener('click', () => {
+      const target = Render.currentExplorerNode || folderNode;
+      ContextMenu.openAddBookmarkModal(target);
+    });
+    actions.appendChild(addBmBtn);
+
+    const addFolderBtn = document.createElement('button');
+    addFolderBtn.className = 'view-toggle__action-btn';
+    addFolderBtn.textContent = '📁 ' + I18n.t('bookmarks.addFolder');
+    addFolderBtn.title = I18n.t('bookmarks.addFolder');
+    addFolderBtn.addEventListener('click', () => {
+      const target = Render.currentExplorerNode || folderNode;
+      ContextMenu.openAddFolderModal(target);
+    });
+    actions.appendChild(addFolderBtn);
+
+    div.appendChild(actions);
 
     return div;
+  },
+
+  createEmptyFolderState(node) {
+    const wrap = document.createElement('div');
+    wrap.className = 'empty-state';
+
+    const text = document.createElement('p');
+    text.className = 'empty-state__text';
+    text.textContent = I18n.t('view.emptyFolder');
+    wrap.appendChild(text);
+
+    const btns = document.createElement('div');
+    btns.className = 'empty-state__buttons';
+
+    const addBm = document.createElement('button');
+    addBm.className = 'empty-state__btn';
+    addBm.textContent = '➕ ' + I18n.t('bookmarks.add');
+    addBm.addEventListener('click', () => ContextMenu.openAddBookmarkModal(node));
+    btns.appendChild(addBm);
+
+    const addFold = document.createElement('button');
+    addFold.className = 'empty-state__btn';
+    addFold.textContent = '📁 ' + I18n.t('bookmarks.addFolder');
+    addFold.addEventListener('click', () => ContextMenu.openAddFolderModal(node));
+    btns.appendChild(addFold);
+
+    wrap.appendChild(btns);
+    return wrap;
   },
 
   // ==================== Grouped Flat List ====================
 
   createGroupedBookmarksList(rootNode) {
+    Render.currentExplorerNode = rootNode;
     const c = document.createElement('div');
     c.className = 'grouped-list';
     const t = Render.linkTarget();
+
+    // Right-click on empty background of flat list
+    c.addEventListener('contextmenu', (e) => {
+      if (e.target.closest('.bookmark-item, .group-header, .empty-state__btn')) return;
+      ContextMenu.showForFolder(e, rootNode);
+    });
 
     const rootLinks = (rootNode.children || []).filter(x => x.url);
     if (rootLinks.length > 0) c.appendChild(Render._grid(rootLinks, t));
 
     Render._groups(c, rootNode, t, 0);
 
-    if (c.children.length === 0) c.innerHTML = '<p style="color:var(--text-muted);padding:20px;">' + I18n.t('view.noBookmarks') + '</p>';
+    if (c.children.length === 0) {
+      c.appendChild(Render.createEmptyFolderState(rootNode));
+    }
     return c;
   },
 
@@ -222,19 +291,27 @@ const Render = {
     for (const folder of (node.children || []).filter(x => !x.url)) {
       const links = (folder.children || []).filter(x => x.url);
       const subs = (folder.children || []).filter(x => !x.url);
-      if (links.length > 0 || subs.length > 0) {
-        const h = document.createElement('div');
-        h.className = 'group-header';
-        h.style.paddingLeft = (depth * 16) + 'px';
-        h.textContent = '📁 ' + folder.title;
-        container.appendChild(h);
-        if (links.length > 0) {
-          const g = Render._grid(links, target);
-          g.style.marginLeft = (depth * 16) + 'px';
-          container.appendChild(g);
-        }
-        Render._groups(container, folder, target, depth + 1);
+      const h = document.createElement('div');
+      h.className = 'group-header';
+      h.style.paddingLeft = (depth * 16) + 'px';
+      h.textContent = '📁 ' + folder.title;
+      h.title = folder.title;
+      h.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
+      container.appendChild(h);
+
+      if (links.length > 0) {
+        const g = Render._grid(links, target);
+        g.style.marginLeft = (depth * 16) + 'px';
+        container.appendChild(g);
+      } else if (subs.length === 0) {
+        const emptyP = document.createElement('div');
+        emptyP.className = 'group-empty';
+        emptyP.style.marginLeft = (depth * 16 + 12) + 'px';
+        emptyP.textContent = I18n.t('view.emptyFolder');
+        emptyP.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
+        container.appendChild(emptyP);
       }
+      Render._groups(container, folder, target, depth + 1);
     }
   },
 
@@ -297,26 +374,57 @@ const Render = {
 
   // ==================== Explorer ====================
 
+  _findNode(root, id) {
+    if (!root) return null;
+    if (root.id === id) return root;
+    for (const child of (root.children || [])) {
+      if (!child.url) {
+        const found = Render._findNode(child, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  },
+
+  _containsNode(node, id) {
+    if (!node || !node.children) return false;
+    for (const child of node.children) {
+      if (child.id === id) return true;
+      if (!child.url && Render._containsNode(child, id)) return true;
+    }
+    return false;
+  },
+
   createExplorerView(rootNode) {
+    let activeNode = rootNode;
+    if (Render.activeFolderId) {
+      const found = Render._findNode(rootNode, Render.activeFolderId);
+      if (found) activeNode = found;
+      else Render.activeFolderId = rootNode.id;
+    } else {
+      Render.activeFolderId = rootNode.id;
+    }
+    Render.currentExplorerNode = activeNode;
+
     const showLinks = Render.s().showLinksInTree !== false;
     const ex = document.createElement('div');
     ex.className = 'explorer';
 
     const tree = document.createElement('div');
     tree.className = 'explorer__tree';
-    tree.appendChild(Render.treeNode(rootNode, 0, true, showLinks));
+    tree.appendChild(Render.treeNode(rootNode, 0, true, showLinks, activeNode.id));
     ex.appendChild(tree);
 
     const content = document.createElement('div');
     content.className = 'explorer__content';
     content.id = 'explorerContent';
-    Render.folderContent(content, rootNode);
+    Render.folderContent(content, activeNode);
     ex.appendChild(content);
 
     return ex;
   },
 
-  treeNode(node, level = 0, expanded = false, showLinks = true) {
+  treeNode(node, level = 0, expanded = false, showLinks = true, activeNodeId = null) {
     const c = document.createElement('div');
     c.className = 'tree-node';
     c.dataset.level = level;
@@ -326,8 +434,12 @@ const Render = {
     const links = (node.children || []).filter(x => x.url);
     const count = subs.length + links.length;
 
+    const isSelfActive = activeNodeId ? (node.id === activeNodeId) : (level === 0);
+    const hasActiveDescendant = activeNodeId && Render._containsNode(node, activeNodeId);
+    const shouldExpand = expanded || hasActiveDescendant;
+
     const label = document.createElement('div');
-    label.className = 'tree-node__label';
+    label.className = 'tree-node__label' + (isSelfActive ? ' active' : '');
     label.draggable = true;
     label.addEventListener('dragstart', (e) => {
       e.stopPropagation();
@@ -335,7 +447,7 @@ const Render = {
     });
 
     const toggle = document.createElement('span');
-    toggle.className = 'tree-node__toggle' + (expanded ? ' expanded' : '');
+    toggle.className = 'tree-node__toggle' + (shouldExpand ? ' expanded' : '');
     toggle.textContent = (subs.length > 0 || (showLinks && links.length > 0)) ? '▶' : '';
     label.appendChild(toggle);
 
@@ -358,6 +470,8 @@ const Render = {
     label.addEventListener('click', () => {
       document.querySelectorAll('.tree-node__label.active').forEach(el => el.classList.remove('active'));
       label.classList.add('active');
+      Render.activeFolderId = node.id;
+      Render.currentExplorerNode = node;
       const hasKids = subs.length > 0 || (showLinks && links.length > 0);
       if (hasKids) {
         toggle.classList.toggle('expanded');
@@ -374,8 +488,8 @@ const Render = {
     const hasKids = subs.length > 0 || (showLinks && links.length > 0);
     if (hasKids) {
       const ch = document.createElement('div');
-      ch.className = 'tree-node__children' + (expanded ? ' open' : '');
-      for (const sub of subs) ch.appendChild(Render.treeNode(sub, level + 1, false, showLinks));
+      ch.className = 'tree-node__children' + (shouldExpand ? ' open' : '');
+      for (const sub of subs) ch.appendChild(Render.treeNode(sub, level + 1, false, showLinks, activeNodeId));
 
       if (showLinks) {
         for (const lk of links) {
@@ -419,11 +533,19 @@ const Render = {
   // ==================== Folder Content Panel ====================
 
   folderContent(panel, node) {
+    Render.currentExplorerNode = node;
+    Render.activeFolderId = node.id;
     panel.innerHTML = '';
     const target = Render.linkTarget();
 
+    // Right-click on panel background
+    panel.oncontextmenu = (e) => {
+      if (e.target.closest('.bookmark-item, .folder-item, .empty-state__btn')) return;
+      ContextMenu.showForFolder(e, node);
+    };
+
     if (!node.children || node.children.length === 0) {
-      panel.innerHTML = '<p style="color:var(--text-muted);padding:20px;">' + I18n.t('view.emptyFolder') + '</p>';
+      panel.appendChild(Render.createEmptyFolderState(node));
       return;
     }
 
@@ -438,8 +560,11 @@ const Render = {
         e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'folder', folderId: folder.id, title: folder.title }));
       });
       div.addEventListener('click', () => {
+        Render.activeFolderId = folder.id;
+        Render.currentExplorerNode = folder;
         const tn = document.querySelector(`.tree-node[data-folder-id="${folder.id}"] > .tree-node__label`);
         if (tn) tn.click();
+        else Render.folderContent(panel, folder);
       });
       div.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
 

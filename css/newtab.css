@@ -312,13 +312,30 @@ body {
 /* ========================================
    GROUPED LIST
    ======================================== */
+.grouped-list {
+  min-height: 300px;
+}
+
 .group-header {
   font-size: var(--font-size-content); font-weight: 600; color: var(--accent);
   padding: 12px 4px 6px; border-bottom: 1px solid var(--border);
   margin-bottom: 8px; margin-top: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s;
 }
 
 .group-header:first-child { margin-top: 0; }
+.group-header:hover { color: var(--accent-hover); }
+
+.group-empty {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  padding: 6px 4px;
+  font-style: italic;
+  opacity: 0.75;
+  cursor: pointer;
+}
 
 /* ========================================
    FOLDER ITEM
@@ -352,6 +369,7 @@ body {
 .explorer__content {
   background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
   padding: 12px; overflow-y: auto; max-height: calc(100vh - 180px);
+  min-height: 400px;
 }
 
 /* ========================================
@@ -391,16 +409,121 @@ body {
 .tree-node__children.open { display: block; }
 
 /* ========================================
-   VIEW TOGGLE
+   VIEW TOGGLE & TOOLBAR
    ======================================== */
-.view-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-
-.view-toggle__btn {
-  padding: 4px 12px; background: var(--bg); border: 1px solid var(--border);
-  border-radius: var(--radius); color: var(--text-muted); font-size: 12px; cursor: pointer;
+.view-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
-.view-toggle__btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.view-toggle__modes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-toggle__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-toggle__btn {
+  padding: 4px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.view-toggle__btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.view-toggle__btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight: 500;
+}
+
+.view-toggle__action-btn {
+  padding: 4px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+
+.view-toggle__action-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ========================================
+   EMPTY STATE (FOLDERS / FLAT VIEW)
+   ======================================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  text-align: center;
+  gap: 14px;
+  min-height: 220px;
+}
+
+.empty-state__text {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.empty-state__buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.empty-state__btn {
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.empty-state__btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 /* ========================================
    CONTEXT MENU

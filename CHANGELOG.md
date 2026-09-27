@@ -8,9 +8,13 @@ All notable changes to this project will be documented in this file.
 - JSON file export and import for settings and tabs
 - Clear and short button labels for backup destinations: «В закладки» / «В файл»
 - Automatic config restoration from synced bookmarks on fresh install (silent background restore)
+- Quick action buttons in the toolbar to add bookmarks and folders from any view
+- Ability to create bookmarks and subfolders directly from the tab context menu
 
 ### Fixed
 - Fixed `icon16.png` and `icon32.png` resolutions to exact declared sizes (16x16 and 32x32)
+- Fixed view mode toggle («Explorer» / «All links»): now always available for any folder/tab, even without subfolders
+- Added empty states with quick action buttons and right-click context menus for empty folders and flat views
 
 ## [1.0.0] - 2026-03-22
 
