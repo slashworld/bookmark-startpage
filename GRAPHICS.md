@@ -23,8 +23,11 @@ You can use tools like:
 - Online icon generators
 
 ### Current Status
-⚠️ Currently using only 48x48 and 128x128 icons
-- Need to add: icon16.png, icon32.png
+✅ All required icons rendered from vector source (`icons/bmsp-icon.svg`):
+- `icon16.png` (16x16)
+- `icon32.png` (32x32)
+- `icon48.png` (48x48)
+- `icon128.png` (128x128)
 
 ## Chrome Web Store Graphics
 
@@ -52,10 +55,10 @@ Used for marketing campaigns
 
 ## Quick Checklist
 
-- [ ] icon16.png (16x16)
-- [ ] icon32.png (32x32)
-- [ ] icon48.png (48x48) ✓
-- [ ] icon128.png (128x128) ✓
+- [x] icon16.png (16x16) ✓
+- [x] icon32.png (32x32) ✓
+- [x] icon48.png (48x48) ✓
+- [x] icon128.png (128x128) ✓
 - [ ] Screenshot 1 (1280x800)
 - [ ] Screenshot 2 (1280x800)
 - [ ] Screenshot 3 (1280x800)
