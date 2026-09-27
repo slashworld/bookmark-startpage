@@ -690,3 +690,176 @@ mark { background: rgba(137,180,250,0.3); color: var(--text); border-radius: 2px
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ========================================
+   SELECTION & DRAG-AND-DROP
+   ======================================== */
+
+.item-checkbox {
+  display: none;
+  accent-color: var(--accent);
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+body.select-mode .item-checkbox,
+body.has-selection .item-checkbox {
+  display: inline-block;
+}
+
+.item-checkbox:hover {
+  transform: scale(1.1);
+  opacity: 1;
+}
+
+.item-checkbox:checked {
+  opacity: 1;
+}
+
+.bookmark-item[draggable="true"],
+.folder-item[draggable="true"],
+.tree-node__label[draggable="true"] {
+  cursor: pointer;
+}
+
+.bookmark-item[draggable="true"]:active,
+.folder-item[draggable="true"]:active,
+.tree-node__label[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.bookmark-item.is-selected,
+.folder-item.is-selected {
+  background: rgba(137, 180, 250, 0.12);
+  border-color: var(--accent);
+}
+
+.tree-node__label.is-selected {
+  background: rgba(137, 180, 250, 0.18);
+  color: var(--accent);
+}
+
+.is-dragging {
+  opacity: 0.35;
+}
+
+.drop-target {
+  outline: 2px dashed var(--accent) !important;
+  outline-offset: -2px;
+  background: rgba(137, 180, 250, 0.18) !important;
+  transition: background 0.15s;
+}
+
+.drag-ghost {
+  position: absolute;
+  top: -1000px;
+  left: -1000px;
+  background: var(--accent);
+  color: #1e1e2e;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Floating selection bar */
+.selection-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-surface);
+  border: 1px solid var(--accent);
+  border-radius: 30px;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  animation: selectionSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes selectionSlideUp {
+  from {
+    transform: translate(-50%, 20px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.selection-bar__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: grab;
+  user-select: none;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition: background 0.15s;
+}
+
+.selection-bar__info:hover {
+  background: var(--bg-hover);
+}
+
+.selection-bar__info:active {
+  cursor: grabbing;
+}
+
+.selection-bar__grab {
+  font-size: 16px;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.selection-bar__count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.selection-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.selection-bar__btn {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 5px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.selection-bar__btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.selection-bar__btn--danger {
+  border-color: rgba(243, 139, 168, 0.4);
+}
+
+.selection-bar__btn--danger:hover {
+  background: rgba(243, 139, 168, 0.15);
+  border-color: #f38ba8;
+  color: #f38ba8;
+}

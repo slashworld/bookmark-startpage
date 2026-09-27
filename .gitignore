@@ -41,3 +41,7 @@ coverage/
 
 # Chrome/Edge extension build artifacts (if any)
 *.crx
+
+# Python cache
+__pycache__/
+*.py[cod]

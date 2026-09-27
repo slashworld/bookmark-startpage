@@ -255,5 +255,30 @@ const Bookmarks = {
         else resolve();
       });
     });
+  },
+
+  async move(id, destination) {
+    return new Promise((resolve, reject) => {
+      chrome.bookmarks.move(id, destination, (result) => {
+        if (chrome.runtime.lastError) reject(chrome.runtime.lastError);
+        else resolve(result);
+      });
+    });
+  },
+
+  async isDescendantOf(childId, ancestorId) {
+    if (childId === ancestorId) return true;
+    let curr = childId;
+    while (curr) {
+      try {
+        const node = await Bookmarks.getNode(curr);
+        if (!node || !node.parentId || node.parentId === '0') return false;
+        if (node.parentId === ancestorId) return true;
+        curr = node.parentId;
+      } catch {
+        return false;
+      }
+    }
+    return false;
   }
 };

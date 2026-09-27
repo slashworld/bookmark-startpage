@@ -135,5 +135,18 @@
     "folderNotFound": "Error: folder not found",
     "noBookmarks": "No bookmarks",
     "emptyFolder": "Empty folder"
+  },
+  "selection": {
+    "moveMode": "Move",
+    "moveModeHint": "Toggle item selection mode for moving",
+    "selected": "Selected: {count}",
+    "selectAll": "Select level",
+    "selectLevel": "Select level",
+    "deselect": "Deselect",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {count} selected items?",
+    "dragHint": "Drag to folder",
+    "movingItems": "Moving: {count}",
+    "cannotMoveIntoDescendant": "Cannot move folder \"{title}\" into its own subfolder"
   }
 }

@@ -135,5 +135,18 @@
     "folderNotFound": "Ошибка: папка не найдена",
     "noBookmarks": "Нет закладок",
     "emptyFolder": "Пустая папка"
+  },
+  "selection": {
+    "moveMode": "Move",
+    "moveModeHint": "Режим выбора элементов для перемещения",
+    "selected": "Выбрано: {count}",
+    "selectAll": "Выбрать уровень",
+    "selectLevel": "Выбрать уровень",
+    "deselect": "Снять выбор",
+    "delete": "Удалить",
+    "deleteConfirm": "Удалить выбранные элементы ({count})?",
+    "dragHint": "Перетащите в папку",
+    "movingItems": "Перемещение: {count}",
+    "cannotMoveIntoDescendant": "Нельзя переместить папку «{title}» в её собственную подпапку"
   }
 }

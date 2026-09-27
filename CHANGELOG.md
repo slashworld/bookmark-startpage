@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - Automatic config restoration from synced bookmarks on fresh install (silent background restore)
 - Quick action buttons in the toolbar to add bookmarks and folders from any view
 - Ability to create bookmarks and subfolders directly from the tab context menu
+- Drag-and-drop moving of bookmarks and folders (direct single-item drag without extra steps, «Move» toolbar button, Shift-click range selection, progressive level-by-level selection, and automatic expansion of source and destination folders in the tree)
 
 ### Fixed
 - Updated extension icons (`icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`) rendered at exact resolutions from vector source `icons/bmsp-icon.svg`

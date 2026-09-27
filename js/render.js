@@ -6,11 +6,15 @@ const Render = {
   _settings: null,
   activeFolderId: null,
   currentExplorerNode: null,
+  expandedFolderIds: new Set(),
 
   async renderAll() {
     await Render.loadSettings();
     Render.renderTabsStrip();
     await Render.renderContent();
+    if (typeof Selection !== 'undefined') {
+      Selection.updateUI();
+    }
   },
 
   async loadSettings() {
@@ -38,6 +42,26 @@ const Render = {
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
     return `rgba(${r},${g},${b},${alpha})`;
+  },
+
+  _nodeDepths: null,
+
+  buildNodeDepths(root) {
+    Render._nodeDepths = new Map();
+    function walk(n, depth) {
+      Render._nodeDepths.set(n.id, depth);
+      if (n.children) {
+        for (const child of n.children) {
+          walk(child, depth + 1);
+        }
+      }
+    }
+    if (root) walk(root, 0);
+  },
+
+  getNodeDepth(id) {
+    if (!Render._nodeDepths) return 0;
+    return Render._nodeDepths.has(id) ? Render._nodeDepths.get(id) : 0;
   },
 
   // ==================== Tabs Strip ====================
@@ -94,6 +118,9 @@ const Render = {
       btn.addEventListener('click', async () => {
         if (Tabs.activeTabId !== tab.id) {
           Render.activeFolderId = null;
+          if (Render.expandedFolderIds) {
+            Render.expandedFolderIds.clear();
+          }
         }
         Tabs.activate(tab.id);  // synchronous set + fire-and-forget save
         await Render.renderAll();
@@ -116,13 +143,26 @@ const Render = {
         btn.addEventListener('dragend', () => btn.classList.remove('dragging'));
       }
 
-      btn.addEventListener('dragover', (e) => { e.preventDefault(); btn.classList.add('drag-over'); });
+      btn.addEventListener('dragover', (e) => {
+        if (tab.bookmarkFolderId && typeof Selection !== 'undefined') {
+          if (!Selection.isValidDropTarget(tab.bookmarkFolderId)) return;
+        }
+        e.preventDefault();
+        btn.classList.add('drag-over');
+      });
       btn.addEventListener('dragleave', () => btn.classList.remove('drag-over'));
       btn.addEventListener('drop', async (e) => {
-        e.preventDefault(); btn.classList.remove('drag-over');
+        e.preventDefault();
+        btn.classList.remove('drag-over');
         try {
-          const d = JSON.parse(e.dataTransfer.getData('text/plain'));
-          if (d.type === 'tab-reorder') { await Tabs.moveTab(d.index, index); await Render.renderAll(); }
+          const raw = (e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain') || '').trim();
+          const d = JSON.parse(raw);
+          if (d.type === 'tab-reorder') {
+            await Tabs.moveTab(d.index, index);
+            await Render.renderAll();
+          } else if (tab.bookmarkFolderId && typeof Selection !== 'undefined') {
+            await Selection.handleDrop(e, tab.bookmarkFolderId);
+          }
         } catch {}
       });
 
@@ -139,8 +179,14 @@ const Render = {
     dz.addEventListener('drop', async (e) => {
       e.preventDefault(); dz.classList.remove('active');
       try {
-        const d = JSON.parse(e.dataTransfer.getData('text/plain'));
-        if (d.type === 'folder') { await Tabs.addTab(d.folderId, d.title); await Render.renderAll(); }
+        const raw = (e.dataTransfer.getData('application/json') || e.dataTransfer.getData('text/plain') || '').trim();
+        const d = JSON.parse(raw);
+        const folderId = d.folderId || (d.items && d.items[0] && d.items[0].type === 'folder' ? d.items[0].id : null);
+        const folderTitle = d.title || (d.items && d.items[0] ? d.items[0].title : '');
+        if (folderId) {
+          await Tabs.addTab(folderId, folderTitle);
+          await Render.renderAll();
+        }
       } catch {}
     });
     strip.appendChild(dz);
@@ -163,6 +209,7 @@ const Render = {
 
     try {
       const folderNode = await Bookmarks.getSubTree(activeTab.bookmarkFolderId);
+      Render.buildNodeDepths(folderNode);
       const viewMode = activeTab.viewMode || 'explorer';
 
       area.innerHTML = '';
@@ -206,6 +253,20 @@ const Render = {
       });
       modes.appendChild(btn);
     });
+
+    // Move mode toggle button — placed right after All links
+    const moveBtn = document.createElement('button');
+    const isMove = typeof Selection !== 'undefined' && Selection.isMoveMode;
+    moveBtn.className = 'view-toggle__btn view-toggle__btn--move' + (isMove ? ' active' : '');
+    moveBtn.textContent = '⇄ ' + (typeof I18n !== 'undefined' ? I18n.t('selection.moveMode') : 'Move');
+    moveBtn.title = typeof I18n !== 'undefined' ? I18n.t('selection.moveModeHint') : 'Move mode';
+    moveBtn.addEventListener('click', () => {
+      if (typeof Selection !== 'undefined') {
+        Selection.toggleMoveMode();
+      }
+    });
+    modes.appendChild(moveBtn);
+
     div.appendChild(modes);
 
     const actions = document.createElement('div');
@@ -260,6 +321,9 @@ const Render = {
     addFold.addEventListener('click', () => ContextMenu.openAddFolderModal(node));
     btns.appendChild(addFold);
 
+    if (typeof Selection !== 'undefined') {
+      Selection.makeDropTarget(wrap, node.id);
+    }
     wrap.appendChild(btns);
     return wrap;
   },
@@ -271,6 +335,10 @@ const Render = {
     const c = document.createElement('div');
     c.className = 'grouped-list';
     const t = Render.linkTarget();
+
+    if (typeof Selection !== 'undefined') {
+      Selection.makeDropTarget(c, rootNode.id);
+    }
 
     // Right-click on empty background of flat list
     c.addEventListener('contextmenu', (e) => {
@@ -299,6 +367,9 @@ const Render = {
       h.textContent = '📁 ' + folder.title;
       h.title = folder.title;
       h.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
+      if (typeof Selection !== 'undefined') {
+        Selection.makeDropTarget(h, folder.id);
+      }
       container.appendChild(h);
 
       if (links.length > 0) {
@@ -311,6 +382,9 @@ const Render = {
         emptyP.style.marginLeft = (depth * 16 + 12) + 'px';
         emptyP.textContent = I18n.t('view.emptyFolder');
         emptyP.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
+        if (typeof Selection !== 'undefined') {
+          Selection.makeDropTarget(emptyP, folder.id);
+        }
         container.appendChild(emptyP);
       }
       Render._groups(container, folder, target, depth + 1);
@@ -328,6 +402,52 @@ const Render = {
     const a = document.createElement('a');
     a.className = 'bookmark-item';
     a.href = bm.url; a.target = target; a.title = bm.url;
+    a.draggable = true;
+
+    a.addEventListener('dragstart', (e) => {
+      if (typeof Selection !== 'undefined') {
+        Selection.handleDragStart(e, {
+          id: bm.id,
+          type: 'bookmark',
+          title: bm.title || bm.url,
+          parentId: bm.parentId,
+          url: bm.url
+        });
+      }
+      a.classList.add('is-dragging');
+    });
+    a.addEventListener('dragend', () => {
+      a.classList.remove('is-dragging');
+    });
+
+    if (typeof Selection !== 'undefined') {
+      const cb = Selection.createCheckbox({
+        id: bm.id,
+        type: 'bookmark',
+        title: bm.title || bm.url,
+        parentId: bm.parentId,
+        url: bm.url
+      });
+      a.appendChild(cb);
+    }
+
+    a.addEventListener('click', (e) => {
+      if (typeof Selection !== 'undefined' && (Selection.isMoveMode || e.shiftKey)) {
+        e.preventDefault();
+        e.stopPropagation();
+        const cb = a.querySelector('.item-checkbox');
+        if (cb) {
+          cb.checked = !cb.checked;
+          Selection.handleItemClick(e, {
+            id: bm.id,
+            type: 'bookmark',
+            title: bm.title || bm.url,
+            parentId: bm.parentId,
+            url: bm.url
+          }, cb);
+        }
+      }
+    });
 
     // Right-click to edit/delete bookmark
     a.addEventListener('contextmenu', (e) => {
@@ -397,6 +517,28 @@ const Render = {
     return false;
   },
 
+  /**
+   * Ensure a folder and all its ancestors are added to expandedFolderIds
+   * so they will be open and visible in the tree.
+   * @param {string|number} folderId
+   */
+  async expandFolderAndAncestors(folderId) {
+    if (!folderId || folderId === '0') return;
+    let curr = String(folderId);
+    while (curr && curr !== '0') {
+      if (Render.expandedFolderIds) {
+        Render.expandedFolderIds.add(curr);
+      }
+      try {
+        const node = await Bookmarks.getNode(curr);
+        if (!node || !node.parentId || node.parentId === '0') break;
+        curr = String(node.parentId);
+      } catch {
+        break;
+      }
+    }
+  },
+
   createExplorerView(rootNode) {
     let activeNode = rootNode;
     if (Render.activeFolderId) {
@@ -438,20 +580,48 @@ const Render = {
 
     const isSelfActive = activeNodeId ? (node.id === activeNodeId) : (level === 0);
     const hasActiveDescendant = activeNodeId && Render._containsNode(node, activeNodeId);
-    const shouldExpand = expanded || hasActiveDescendant;
+    const isExplicitlyExpanded = Render.expandedFolderIds && Render.expandedFolderIds.has(String(node.id));
+    const shouldExpand = expanded || hasActiveDescendant || isExplicitlyExpanded;
+    if (shouldExpand && Render.expandedFolderIds) {
+      Render.expandedFolderIds.add(String(node.id));
+    }
 
     const label = document.createElement('div');
     label.className = 'tree-node__label' + (isSelfActive ? ' active' : '');
     label.draggable = true;
     label.addEventListener('dragstart', (e) => {
-      e.stopPropagation();
-      e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'folder', folderId: node.id, title: node.title || I18n.t('bookmarks.title') }));
+      if (typeof Selection !== 'undefined') {
+        Selection.handleDragStart(e, {
+          id: node.id,
+          type: 'folder',
+          title: node.title || I18n.t('bookmarks.title'),
+          parentId: node.parentId
+        });
+      }
+      label.classList.add('is-dragging');
     });
+    label.addEventListener('dragend', () => {
+      label.classList.remove('is-dragging');
+    });
+
+    if (typeof Selection !== 'undefined') {
+      Selection.makeDropTarget(label, node.id);
+    }
 
     const toggle = document.createElement('span');
     toggle.className = 'tree-node__toggle' + (shouldExpand ? ' expanded' : '');
     toggle.textContent = (subs.length > 0 || (showLinks && links.length > 0)) ? '▶' : '';
     label.appendChild(toggle);
+
+    if (typeof Selection !== 'undefined') {
+      const cb = Selection.createCheckbox({
+        id: node.id,
+        type: 'folder',
+        title: node.title || I18n.t('bookmarks.title'),
+        parentId: node.parentId
+      });
+      label.appendChild(cb);
+    }
 
     const icon = document.createElement('span');
     icon.textContent = '📁';
@@ -469,16 +639,41 @@ const Render = {
       label.appendChild(cnt);
     }
 
-    label.addEventListener('click', () => {
+    label.addEventListener('click', (e) => {
+      if (typeof Selection !== 'undefined' && (Selection.isMoveMode || e.shiftKey)) {
+        if (!e.target.classList.contains('tree-node__toggle')) {
+          e.preventDefault();
+          e.stopPropagation();
+          const cb = label.querySelector('.item-checkbox');
+          if (cb) {
+            cb.checked = !cb.checked;
+            Selection.handleItemClick(e, {
+              id: node.id,
+              type: 'folder',
+              title: node.title || I18n.t('bookmarks.title'),
+              parentId: node.parentId
+            }, cb);
+          }
+          return;
+        }
+      }
+
       document.querySelectorAll('.tree-node__label.active').forEach(el => el.classList.remove('active'));
       label.classList.add('active');
       Render.activeFolderId = node.id;
       Render.currentExplorerNode = node;
       const hasKids = subs.length > 0 || (showLinks && links.length > 0);
       if (hasKids) {
-        toggle.classList.toggle('expanded');
+        const isNowExpanded = toggle.classList.toggle('expanded');
         const ch = c.querySelector(':scope > .tree-node__children');
-        if (ch) ch.classList.toggle('open');
+        if (ch) ch.classList.toggle('open', isNowExpanded);
+        if (Render.expandedFolderIds) {
+          if (isNowExpanded) {
+            Render.expandedFolderIds.add(String(node.id));
+          } else {
+            Render.expandedFolderIds.delete(String(node.id));
+          }
+        }
       }
       const cp = document.getElementById('explorerContent');
       if (cp) Render.folderContent(cp, node);
@@ -502,6 +697,41 @@ const Render = {
           const la = document.createElement('a');
           la.className = 'tree-node__label tree-node__label--link';
           la.href = lk.url; la.target = Render.linkTarget(); la.title = lk.url;
+          la.draggable = true;
+
+          la.addEventListener('click', (e) => {
+            if (typeof Selection !== 'undefined' && (Selection.isMoveMode || e.shiftKey)) {
+              e.preventDefault();
+              e.stopPropagation();
+              const cb = la.querySelector('.item-checkbox');
+              if (cb) {
+                cb.checked = !cb.checked;
+                Selection.handleItemClick(e, {
+                  id: lk.id,
+                  type: 'bookmark',
+                  title: lk.title || lk.url,
+                  parentId: lk.parentId,
+                  url: lk.url
+                }, cb);
+              }
+            }
+          });
+
+          la.addEventListener('dragstart', (e) => {
+            if (typeof Selection !== 'undefined') {
+              Selection.handleDragStart(e, {
+                id: lk.id,
+                type: 'bookmark',
+                title: lk.title || lk.url,
+                parentId: lk.parentId,
+                url: lk.url
+              });
+            }
+            la.classList.add('is-dragging');
+          });
+          la.addEventListener('dragend', () => {
+            la.classList.remove('is-dragging');
+          });
 
           // Right-click to edit/delete
           la.addEventListener('contextmenu', (e) => {
@@ -511,6 +741,17 @@ const Render = {
           const sp = document.createElement('span');
           sp.className = 'tree-node__toggle';
           la.appendChild(sp);
+
+          if (typeof Selection !== 'undefined') {
+            const cb = Selection.createCheckbox({
+              id: lk.id,
+              type: 'bookmark',
+              title: lk.title || lk.url,
+              parentId: lk.parentId,
+              url: lk.url
+            });
+            la.appendChild(cb);
+          }
 
           const fav = document.createElement('img');
           fav.src = Bookmarks.getFavicon(lk.url);
@@ -540,6 +781,10 @@ const Render = {
     panel.innerHTML = '';
     const target = Render.linkTarget();
 
+    if (typeof Selection !== 'undefined') {
+      Selection.makeDropTarget(panel, node.id);
+    }
+
     // Right-click on panel background
     panel.oncontextmenu = (e) => {
       if (e.target.closest('.bookmark-item, .folder-item, .empty-state__btn')) return;
@@ -558,15 +803,69 @@ const Render = {
       const div = document.createElement('div');
       div.className = 'folder-item'; div.draggable = true;
       div.addEventListener('dragstart', (e) => {
-        e.stopPropagation();
-        e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'folder', folderId: folder.id, title: folder.title }));
+        if (typeof Selection !== 'undefined') {
+          Selection.handleDragStart(e, {
+            id: folder.id,
+            type: 'folder',
+            title: folder.title,
+            parentId: folder.parentId
+          });
+        }
+        div.classList.add('is-dragging');
       });
-      div.addEventListener('click', () => {
+      div.addEventListener('dragend', () => {
+        div.classList.remove('is-dragging');
+      });
+
+      if (typeof Selection !== 'undefined') {
+        Selection.makeDropTarget(div, folder.id);
+        const cb = Selection.createCheckbox({
+          id: folder.id,
+          type: 'folder',
+          title: folder.title,
+          parentId: folder.parentId
+        });
+        div.appendChild(cb);
+      }
+
+      div.addEventListener('click', (e) => {
+        if (typeof Selection !== 'undefined' && (Selection.isMoveMode || e.shiftKey)) {
+          e.preventDefault();
+          e.stopPropagation();
+          const cb = div.querySelector('.item-checkbox');
+          if (cb) {
+            cb.checked = !cb.checked;
+            Selection.handleItemClick(e, {
+              id: folder.id,
+              type: 'folder',
+              title: folder.title,
+              parentId: folder.parentId
+            }, cb);
+          }
+          return;
+        }
         Render.activeFolderId = folder.id;
         Render.currentExplorerNode = folder;
+        if (Render.expandedFolderIds) {
+          Render.expandedFolderIds.add(String(folder.id));
+        }
         const tn = document.querySelector(`.tree-node[data-folder-id="${folder.id}"] > .tree-node__label`);
-        if (tn) tn.click();
-        else Render.folderContent(panel, folder);
+        if (tn) {
+          let p = tn.closest('.tree-node__children');
+          while (p) {
+            p.classList.add('open');
+            const parentToggle = p.parentElement?.querySelector(':scope > .tree-node__label > .tree-node__toggle');
+            if (parentToggle) parentToggle.classList.add('expanded');
+            const parentFolderId = p.parentElement?.dataset?.folderId;
+            if (parentFolderId && Render.expandedFolderIds) {
+              Render.expandedFolderIds.add(String(parentFolderId));
+            }
+            p = p.parentElement?.closest('.tree-node__children');
+          }
+          tn.click();
+        } else {
+          Render.folderContent(panel, folder);
+        }
       });
       div.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
 

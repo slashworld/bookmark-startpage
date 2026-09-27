@@ -79,6 +79,7 @@ document.addEventListener('visibilitychange', () => {
   ContextMenu.init();
   Modal.init();
   Filter.init();
+  Selection.init();
   await initGlobalSettings();
   await Render.renderAll();
 
