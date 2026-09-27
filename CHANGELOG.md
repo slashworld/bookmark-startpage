@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - Updated extension icons (`icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`) rendered at exact resolutions from vector source `icons/bmsp-icon.svg`
 - Fixed view mode toggle («Explorer» / «All links»): now always available for any folder/tab, even without subfolders
 - Added empty states with quick action buttons and right-click context menus for empty folders and flat views
+- Improved visibility and borders for inactive tabs without an assigned color
 
 ## [1.0.0] - 2026-03-22
 

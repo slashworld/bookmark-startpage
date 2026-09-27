@@ -57,10 +57,12 @@ const Render = {
         if (isActive) {
           btn.style.background = tab.color;
           btn.style.color = '#1e1e2e';
+          btn.style.borderColor = tab.color;
           btn.style.borderBottomColor = tab.color;
         } else {
           btn.style.background = Render.hexToRgba(tab.color, 0.15);
           btn.style.color = tab.color;
+          btn.style.borderColor = Render.hexToRgba(tab.color, 0.35);
           btn.style.borderBottomColor = 'transparent';
         }
       }
