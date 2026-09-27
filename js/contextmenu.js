@@ -45,7 +45,7 @@ const ContextMenu = {
 
     ContextMenu.menu.innerHTML = `
       <button class="ctx-menu__item" data-action="add-bookmark">➕ ${I18n.t('bookmarks.add')}</button>
-      <button class="ctx-menu__item" data-action="add-folder">📁 ${I18n.t('bookmarks.addFolder')}</button>
+      <button class="ctx-menu__item" data-action="add-folder">${Theme.getFolderIconHtml('ctx-menu__icon')} ${I18n.t('bookmarks.addFolder')}</button>
       <div class="ctx-menu__separator"></div>
       <button class="ctx-menu__item" data-action="edit-folder">✏️ ${I18n.t('bookmarks.renameFolder')}</button>
       <button class="ctx-menu__item ctx-menu__item--danger" data-action="delete-folder">🗑️ ${I18n.t('bookmarks.deleteFolder')}</button>
@@ -77,7 +77,7 @@ const ContextMenu = {
     const pinLabel = tab.pinned ? '📌 ' + I18n.t('tabs.unpin') : '📌 ' + I18n.t('tabs.pin');
     let html = `
       <button class="ctx-menu__item" data-action="tab-add-bookmark">➕ ${I18n.t('bookmarks.add')}</button>
-      <button class="ctx-menu__item" data-action="tab-add-folder">📁 ${I18n.t('bookmarks.addFolder')}</button>
+      <button class="ctx-menu__item" data-action="tab-add-folder">${Theme.getFolderIconHtml('ctx-menu__icon')} ${I18n.t('bookmarks.addFolder')}</button>
       <div class="ctx-menu__separator"></div>
       <button class="ctx-menu__item" data-action="toggle-pin">${pinLabel}</button>
     `;

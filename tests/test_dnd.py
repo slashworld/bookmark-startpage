@@ -109,9 +109,9 @@ def main():
         print(f"Error connecting to CDP: {e}")
         sys.exit(1)
 
-    newtab = next((t for t in targets if t.get('url', '').startswith('chrome://newtab') and t.get('type') == 'page'), None)
+    newtab = next((t for t in targets if (t.get('url', '').startswith('chrome://newtab') or 'newtab.html' in t.get('url', '')) and t.get('type') == 'page'), None)
     if not newtab:
-        print("Error: chrome://newtab page target not found")
+        print("Error: newtab page target not found")
         sys.exit(1)
 
     ws_url = newtab['webSocketDebuggerUrl']

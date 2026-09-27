@@ -5,8 +5,11 @@
 let selectedFolderId = null;
 
 (async function init() {
-  // Initialize i18n first
+  // Initialize i18n and theme first
   await I18n.init();
+  if (typeof Theme !== 'undefined') {
+    await Theme.init();
+  }
 
   setupBackLink();
 
@@ -92,9 +95,7 @@ function renderNode(container, node, depth) {
   if (depth === 0) arrow.classList.add('expanded');
   row.appendChild(arrow);
 
-  const icon = document.createElement('span');
-  icon.className = 'fp-icon';
-  icon.textContent = '📁';
+  const icon = Theme.createFolderIcon('fp-icon');
   row.appendChild(icon);
 
   const title = document.createElement('span');
@@ -200,8 +201,7 @@ function renderTabsList(tabs) {
     const item = document.createElement('div');
     item.className = 'tabs-list-item';
 
-    const iconEl = document.createElement('span');
-    iconEl.textContent = '📁';
+    const iconEl = Theme.createFolderIcon('tabs-list-item__icon');
     item.appendChild(iconEl);
 
     if (tab.color) {

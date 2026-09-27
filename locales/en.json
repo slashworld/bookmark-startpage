@@ -148,5 +148,10 @@
     "dragHint": "Drag to folder",
     "movingItems": "Moving: {count}",
     "cannotMoveIntoDescendant": "Cannot move folder \"{title}\" into its own subfolder"
+  },
+  "theme": {
+    "auto": "System theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
   }
 }

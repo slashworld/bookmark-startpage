@@ -244,7 +244,12 @@ const Render = {
     ['explorer', 'flat'].forEach(mode => {
       const btn = document.createElement('button');
       btn.className = 'view-toggle__btn' + (currentMode === mode ? ' active' : '');
-      btn.textContent = mode === 'explorer' ? '📁 ' + I18n.t('view.explorer') : '📋 ' + I18n.t('view.allLinks');
+      if (mode === 'explorer') {
+        btn.appendChild(Theme.createFolderIcon());
+        btn.appendChild(document.createTextNode(' ' + I18n.t('view.explorer')));
+      } else {
+        btn.textContent = '📋 ' + I18n.t('view.allLinks');
+      }
       btn.addEventListener('click', async () => {
         Tabs.setViewMode(tabId, mode);  // synchronous + fire-and-forget save
         const tab = Tabs.list.find(t => t.id === tabId);
@@ -284,7 +289,8 @@ const Render = {
 
     const addFolderBtn = document.createElement('button');
     addFolderBtn.className = 'view-toggle__action-btn';
-    addFolderBtn.textContent = '📁 ' + I18n.t('bookmarks.addFolder');
+    addFolderBtn.appendChild(Theme.createFolderIcon());
+    addFolderBtn.appendChild(document.createTextNode(' ' + I18n.t('bookmarks.addFolder')));
     addFolderBtn.title = I18n.t('bookmarks.addFolder');
     addFolderBtn.addEventListener('click', () => {
       const target = Render.currentExplorerNode || folderNode;
@@ -317,7 +323,8 @@ const Render = {
 
     const addFold = document.createElement('button');
     addFold.className = 'empty-state__btn';
-    addFold.textContent = '📁 ' + I18n.t('bookmarks.addFolder');
+    addFold.appendChild(Theme.createFolderIcon());
+    addFold.appendChild(document.createTextNode(' ' + I18n.t('bookmarks.addFolder')));
     addFold.addEventListener('click', () => ContextMenu.openAddFolderModal(node));
     btns.appendChild(addFold);
 
@@ -364,7 +371,10 @@ const Render = {
       const h = document.createElement('div');
       h.className = 'group-header';
       h.style.paddingLeft = (depth * 16) + 'px';
-      h.textContent = '📁 ' + folder.title;
+      h.appendChild(Theme.createFolderIcon('group-header__icon'));
+      const hTitle = document.createElement('span');
+      hTitle.textContent = folder.title;
+      h.appendChild(hTitle);
       h.title = folder.title;
       h.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
       if (typeof Selection !== 'undefined') {
@@ -623,8 +633,7 @@ const Render = {
       label.appendChild(cb);
     }
 
-    const icon = document.createElement('span');
-    icon.textContent = '📁';
+    const icon = Theme.createFolderIcon('tree-node__icon');
     label.appendChild(icon);
 
     const title = document.createElement('span');
@@ -869,8 +878,7 @@ const Render = {
       });
       div.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
 
-      const ic = document.createElement('span');
-      ic.className = 'folder-item__icon'; ic.textContent = '📁';
+      const ic = Theme.createFolderIcon('folder-item__icon');
       div.appendChild(ic);
 
       const ti = document.createElement('span');

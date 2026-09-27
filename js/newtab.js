@@ -57,9 +57,12 @@ document.addEventListener('visibilitychange', () => {
 // ==================== Main Init ====================
 
 (async function init() {
-  // Initialize i18n first
+  // Initialize i18n and theme first
   await I18n.init();
   I18n.setupSync(); // Enable language sync across tabs
+  if (typeof Theme !== 'undefined') {
+    await Theme.init();
+  }
 
   // Auto-restore saved config from bookmarks on fresh install / empty state
   try {

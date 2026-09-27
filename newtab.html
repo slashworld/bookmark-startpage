@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Стартовая</title>
   <link rel="stylesheet" href="css/newtab.css">
+  <script src="js/theme.js"></script>
 </head>
 <body>
   <!-- Top bar: full-width flex, gear pinned to right edge -->
@@ -18,6 +19,11 @@
         <input type="checkbox" id="filterCurrentTab">
         <span data-i18n="search.currentTabOnly">только в текущем табе</span>
       </label>
+    </div>
+    <div class="topbar__theme-toggle" id="themeToggle" role="group" aria-label="Theme">
+      <button type="button" class="theme-btn" data-theme-val="auto" data-i18n-title="theme.auto" title="Как на устройстве">💻</button>
+      <button type="button" class="theme-btn" data-theme-val="light" data-i18n-title="theme.light" title="Светлая">☀️</button>
+      <button type="button" class="theme-btn" data-theme-val="dark" data-i18n-title="theme.dark" title="Тёмная">🌙</button>
     </div>
     <button class="topbar__gear" id="gearBtn" data-i18n-title="settings.title" title="Настройки"><span>⚙️</span></button>
   </header>
