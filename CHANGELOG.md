@@ -14,6 +14,9 @@ All notable changes to this project will be documented in this file.
 - Light theme (Catppuccin Latte) with a 3-state switcher on the start page: 💻 Auto (device default), ☀️ Light, 🌙 Dark, with local installation-level persistence
 - High-contrast dual-tone vector SVG folder icons replacing emoji across all views (tree navigator, folder cards, group headers, and options page) with tailored colors for light (warm amber) and dark (peach/gold) themes
 
+### Changed
+- Split monolithic stylesheet into modular CSS files (`theme.css`, `layout.css`, `explorer.css`, `modals.css`, `dnd.css`) with `newtab.css` acting as the master import hub for clean maintainability
+
 ### Fixed
 - Updated extension icons (`icon16.png`, `icon32.png`, `icon48.png`, `icon128.png`) rendered at exact resolutions from vector source `icons/bmsp-icon.svg`
 - Fixed view mode toggle («Explorer» / «All links»): now always available for any folder/tab, even without subfolders

@@ -176,9 +176,15 @@ js/
   filter.js      # Search/filter logic
   contextmenu.js # Context menus and modals
   configstore.js # Config export/import via bookmarks
+  theme.js       # Theme state and switcher
 
 css/
-  newtab.css     # All styles (no build step)
+  newtab.css     # Main stylesheet (imports modular CSS files)
+  theme.css      # Variables, resets, typography, and base elements
+  layout.css     # Top bar, tabs strip, content area, bottom bar
+  explorer.css   # Bookmarks grid, tree navigator, toolbar, folders
+  modals.css     # Context menus and modal dialogs
+  dnd.css        # Selection mode and drag-and-drop
 
 html/
   newtab.html    # New tab page

@@ -1,0 +1,134 @@
+/* ========================================
+   THEME & BASE STYLES
+   Reset, CSS variables, typography, and base elements
+   ======================================== */
+
+/* === Reset & Base === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root,
+:root[data-theme="dark"] {
+  --bg: #1e1e2e;
+  --bg-surface: #262637;
+  --bg-hover: #2e2e44;
+  --bg-active: #3b3b58;
+  --text: #cdd6f4;
+  --text-muted: #7f849c;
+  --accent: #89b4fa;
+  --accent-hover: #74c7ec;
+  --border: #45475a;
+  --danger: #f38ba8;
+  --success: #a6e3a1;
+  --radius: 6px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-tabs: 13px;
+  --font-size-nav: 13px;
+  --font-size-content: 13px;
+  --folder-icon-front: #fab387;
+  --folder-icon-back: #e08f58;
+}
+
+:root[data-theme="light"] {
+  --bg: #eff1f5;
+  --bg-surface: #e6e9ef;
+  --bg-hover: #dce0e8;
+  --bg-active: #ccd0da;
+  --text: #4c4f69;
+  --text-muted: #8c8fa1;
+  --accent: #1e66f5;
+  --accent-hover: #04a5e5;
+  --border: #ccd0da;
+  --danger: #d20f39;
+  --success: #40a02b;
+  --folder-icon-front: #df8e1d;
+  --folder-icon-back: #b8740c;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #eff1f5;
+    --bg-surface: #e6e9ef;
+    --bg-hover: #dce0e8;
+    --bg-active: #ccd0da;
+    --text: #4c4f69;
+    --text-muted: #8c8fa1;
+    --accent: #1e66f5;
+    --accent-hover: #04a5e5;
+    --border: #ccd0da;
+    --danger: #d20f39;
+    --success: #40a02b;
+    --folder-icon-front: #df8e1d;
+    --folder-icon-back: #b8740c;
+  }
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Folder SVG Icons === */
+.folder-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.folder-svg {
+  display: block;
+  width: 1.15em;
+  height: 1.15em;
+  pointer-events: none;
+  overflow: visible;
+  transition: transform 0.15s ease;
+}
+
+.folder-svg__back {
+  fill: var(--folder-icon-back);
+}
+
+.folder-svg__front {
+  fill: var(--folder-icon-front);
+}
+
+:root[data-theme="light"] .folder-svg {
+  filter: drop-shadow(0 0.5px 0.5px rgba(100, 50, 0, 0.22));
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .folder-svg {
+    filter: drop-shadow(0 0.5px 0.5px rgba(100, 50, 0, 0.22));
+  }
+}
+
+/* === Scrollbars & Misc === */
+mark {
+  background: rgba(137, 180, 250, 0.3);
+  color: var(--text);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
