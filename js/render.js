@@ -195,6 +195,7 @@ const Render = {
   // ==================== Content ====================
 
   async renderContent() {
+    await Render.loadSettings();
     const area = document.getElementById('contentArea');
     const activeTab = Tabs.getActive();
 
@@ -214,11 +215,12 @@ const Render = {
 
       area.innerHTML = '';
 
-      // Apply font sizes
+      // Apply font sizes and icon size
       const st = Render.s();
       document.documentElement.style.setProperty('--font-size-tabs', st.fontSizeTabs + 'px');
       document.documentElement.style.setProperty('--font-size-nav', st.fontSizeNav + 'px');
       document.documentElement.style.setProperty('--font-size-content', st.fontSizeContent + 'px');
+      document.documentElement.style.setProperty('--bookmark-icon-size', (st.iconSize || 48) + 'px');
 
       // Always show view toggle & action toolbar for any folder
       area.appendChild(Render.createViewToggle(viewMode, activeTab.id, folderNode));
@@ -402,16 +404,26 @@ const Render = {
   },
 
   _grid(bookmarks, target) {
+    const st = Render.s();
+    const pos = st.labelPosition || 'right';
+    const noLabel = (st.showTitle === false && st.showUrl === false);
     const g = document.createElement('div');
-    g.className = 'bookmarks-list';
+    g.className = `bookmarks-list label-pos-${pos}` + (noLabel ? ' no-label' : '');
     for (const bm of bookmarks) g.appendChild(Render._link(bm, target));
     return g;
   },
 
   _link(bm, target, showPath = false) {
+    const st = Render.s();
+    const iconSize = st.iconSize || 48;
+    const pos = st.labelPosition || 'right';
+    const showTitle = st.showTitle !== false;
+    const showUrl = st.showUrl !== false;
+    const noLabel = !showTitle && !showUrl;
+
     const a = document.createElement('a');
-    a.className = 'bookmark-item';
-    a.href = bm.url; a.target = target; a.title = bm.url;
+    a.className = `bookmark-item label-pos-${pos}` + (noLabel ? ' no-label' : '');
+    a.href = bm.url; a.target = target; a.title = bm.title ? `${bm.title} (${bm.url})` : bm.url;
     a.draggable = true;
 
     a.addEventListener('dragstart', (e) => {
@@ -464,41 +476,142 @@ const Render = {
       ContextMenu.showForBookmark(e, bm);
     });
 
+    const iconWrap = document.createElement('div');
+    iconWrap.className = 'bookmark-item__icon-wrap';
+
     const img = document.createElement('img');
     img.className = 'bookmark-item__favicon';
-    img.src = Bookmarks.getFavicon(bm.url);
-    img.onerror = () => img.style.display = 'none';
-    a.appendChild(img);
 
-    const info = document.createElement('div');
-    info.className = 'bookmark-item__info';
+    const applySizing = () => {
+      if (img.naturalWidth > 0 && img.naturalWidth < iconSize) {
+        img.classList.remove('is-fullsize');
+        img.classList.add('is-undersized');
+        iconWrap.classList.add('has-undersized-icon');
+      } else {
+        img.classList.remove('is-undersized');
+        img.classList.add('is-fullsize');
+        iconWrap.classList.remove('has-undersized-icon');
+      }
+    };
 
-    const ti = document.createElement('div');
-    ti.className = 'bookmark-item__title';
-    ti.textContent = bm.title || bm.url;
-    info.appendChild(ti);
+    let fallbackTried = false;
+    const handleLoadedImage = () => {
+      const isGoogle = img.src.includes('t0.gstatic.com') || img.src.includes('faviconV2');
+      if (isGoogle && !fallbackTried && img.naturalWidth <= 16) {
+        Bookmarks.checkChromeFavicon(bm.url, iconSize).then((res) => {
+          if (res.hasRealIcon) {
+            fallbackTried = true;
+            img.src = Bookmarks.getChromeFavicon(bm.url, iconSize);
+          } else {
+            applySizing();
+          }
+        });
+        return;
+      }
+      applySizing();
+    };
 
-    const u = document.createElement('div');
-    u.className = 'bookmark-item__url';
-    u.textContent = bm.url;
-    info.appendChild(u);
+    img.onload = () => {
+      handleLoadedImage();
+    };
 
-    if (showPath && bm._path) {
-      const p = document.createElement('div');
-      p.className = 'bookmark-item__path';
-      p.textContent = bm._path;
-      info.appendChild(p);
+    img.onerror = () => {
+      // Step 2 fallback: If this was Google and not local, try Chrome's local _favicon
+      if (!fallbackTried && !Bookmarks.isLocalUrl(bm.url)) {
+        fallbackTried = true;
+        Bookmarks.checkChromeFavicon(bm.url, iconSize).then((res) => {
+          if (res.hasRealIcon) {
+            img.src = Bookmarks.getChromeFavicon(bm.url, iconSize);
+            return;
+          }
+          img.remove();
+          iconWrap.appendChild(Render.createLetterAvatar(bm));
+        });
+        return;
+      }
+      // Step 3 fallback: If local Chrome API also failed or no icon available, show styled letter avatar
+      img.remove();
+      iconWrap.appendChild(Render.createLetterAvatar(bm));
+    };
+
+    img.src = Bookmarks.getFavicon(bm.url, iconSize);
+    if (img.complete && img.naturalWidth > 0) {
+      handleLoadedImage();
+    }
+    iconWrap.appendChild(img);
+    a.appendChild(iconWrap);
+
+    if (showTitle || showUrl || (showPath && bm._path)) {
+      const info = document.createElement('div');
+      info.className = 'bookmark-item__info';
+
+      if (showTitle) {
+        const ti = document.createElement('div');
+        ti.className = 'bookmark-item__title';
+        ti.textContent = bm.title || bm.url;
+        info.appendChild(ti);
+      }
+
+      if (showUrl) {
+        const u = document.createElement('div');
+        u.className = 'bookmark-item__url';
+        u.textContent = bm.url;
+        info.appendChild(u);
+      }
+
+      if (showPath && bm._path) {
+        const p = document.createElement('div');
+        p.className = 'bookmark-item__path';
+        p.textContent = bm._path;
+        info.appendChild(p);
+      }
+
+      a.appendChild(info);
     }
 
-    a.appendChild(info);
     return a;
+  },
+
+  /** Generate stylized letter avatar for bookmarks without a favicon */
+  createLetterAvatar(bm) {
+    const div = document.createElement('div');
+    div.className = 'bookmark-item__letter-avatar';
+
+    let title = (bm.title || '').trim();
+    if (!title && bm.url) {
+      try {
+        title = new URL(bm.url).hostname.replace(/^www\./, '');
+      } catch {
+        title = bm.url;
+      }
+    }
+    const letter = (title ? title.charAt(0) : '?').toUpperCase();
+    div.textContent = letter;
+
+    let host = '';
+    try {
+      host = new URL(bm.url).hostname;
+    } catch {
+      host = title || '';
+    }
+
+    if (typeof Theme !== 'undefined' && Theme.getAvatarGradient) {
+      div.style.background = Theme.getAvatarGradient(host || letter);
+    } else {
+      div.style.background = 'linear-gradient(135deg, #89b4fa, #74c7ec)';
+    }
+
+    return div;
   },
 
   /** For search results (filter.js) */
   createBookmarksList(bookmarks, hideEmptyPath = false) {
+    const st = Render.s();
+    const pos = st.labelPosition || 'right';
+    const noLabel = (st.showTitle === false && st.showUrl === false);
     const t = Render.linkTarget();
     const g = document.createElement('div');
-    g.className = 'bookmarks-list';
+    g.className = `bookmarks-list label-pos-${pos}` + (noLabel ? ' no-label' : '');
     for (const bm of bookmarks) g.appendChild(Render._link(bm, t, !hideEmptyPath));
     if (bookmarks.length === 0) g.innerHTML = '<p style="color:var(--text-muted);padding:20px;">' + I18n.t('view.noBookmarks') + '</p>';
     return g;
@@ -763,9 +876,44 @@ const Render = {
           }
 
           const fav = document.createElement('img');
-          fav.src = Bookmarks.getFavicon(lk.url);
           fav.className = 'tree-node__favicon';
-          fav.onerror = () => fav.style.display = 'none';
+          let treeFallbackDone = false;
+
+          const handleTreeFavicon = () => {
+            const isGoogle = fav.src.includes('t0.gstatic.com') || fav.src.includes('faviconV2');
+            if (isGoogle && !treeFallbackDone) {
+              Bookmarks.checkChromeFavicon(lk.url, 16).then((res) => {
+                if (res.hasRealIcon) {
+                  treeFallbackDone = true;
+                  fav.src = Bookmarks.getChromeFavicon(lk.url, 16);
+                }
+              });
+            }
+          };
+
+          fav.onload = () => {
+            handleTreeFavicon();
+          };
+
+          fav.onerror = () => {
+            if (!treeFallbackDone && !Bookmarks.isLocalUrl(lk.url)) {
+              treeFallbackDone = true;
+              Bookmarks.checkChromeFavicon(lk.url, 16).then((res) => {
+                if (res.hasRealIcon) {
+                  fav.src = Bookmarks.getChromeFavicon(lk.url, 16);
+                  return;
+                }
+                fav.style.display = 'none';
+              });
+              return;
+            }
+            fav.style.display = 'none';
+          };
+
+          fav.src = Bookmarks.getFavicon(lk.url, 16);
+          if (fav.complete && fav.naturalWidth > 0) {
+            handleTreeFavicon();
+          }
           la.appendChild(fav);
 
           const lt = document.createElement('span');
@@ -805,12 +953,19 @@ const Render = {
       return;
     }
 
+    const st = Render.s();
+    const pos = st.labelPosition || 'right';
+    const showTitle = st.showTitle !== false;
+    const noLabel = !showTitle;
+
     const grid = document.createElement('div');
-    grid.className = 'bookmarks-list';
+    grid.className = `bookmarks-list label-pos-${pos}` + (noLabel ? ' no-label' : '');
 
     for (const folder of node.children.filter(x => !x.url)) {
       const div = document.createElement('div');
-      div.className = 'folder-item'; div.draggable = true;
+      div.className = `folder-item label-pos-${pos}` + (noLabel ? ' no-label' : '');
+      div.draggable = true;
+      div.title = folder.title;
       div.addEventListener('dragstart', (e) => {
         if (typeof Selection !== 'undefined') {
           Selection.handleDragStart(e, {
@@ -881,15 +1036,22 @@ const Render = {
       const ic = Theme.createFolderIcon('folder-item__icon');
       div.appendChild(ic);
 
-      const ti = document.createElement('span');
-      ti.className = 'folder-item__title'; ti.textContent = folder.title;
-      div.appendChild(ti);
+      if (showTitle) {
+        const info = document.createElement('div');
+        info.className = 'folder-item__info';
 
-      const sc = (folder.children || []).length;
-      if (sc > 0) {
-        const cnt = document.createElement('span');
-        cnt.className = 'folder-item__count'; cnt.textContent = '(' + sc + ')';
-        div.appendChild(cnt);
+        const ti = document.createElement('span');
+        ti.className = 'folder-item__title'; ti.textContent = folder.title;
+        info.appendChild(ti);
+
+        const sc = (folder.children || []).length;
+        if (sc > 0) {
+          const cnt = document.createElement('span');
+          cnt.className = 'folder-item__count'; cnt.textContent = '(' + sc + ')';
+          info.appendChild(cnt);
+        }
+
+        div.appendChild(info);
       }
       grid.appendChild(div);
     }

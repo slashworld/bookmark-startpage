@@ -8,60 +8,239 @@
    ======================================== */
 .bookmarks-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 8px;
+  gap: 10px;
   font-size: var(--font-size-content);
+}
+
+/* Horizontal layouts: label right (default) or label left */
+.bookmarks-list,
+.bookmarks-list.label-pos-right,
+.bookmarks-list.label-pos-left {
+  grid-template-columns: repeat(auto-fill, minmax(max(240px, calc(var(--bookmark-icon-size) + 160px)), 1fr));
+}
+
+/* Vertical layouts: label bottom or label top (tile / speed-dial style) */
+.bookmarks-list.label-pos-bottom,
+.bookmarks-list.label-pos-top {
+  grid-template-columns: repeat(auto-fill, minmax(max(88px, calc(var(--bookmark-icon-size) + 36px)), 1fr));
+}
+
+/* When no labels are shown (icons only) */
+.bookmarks-list.no-label {
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--bookmark-icon-size) + 24px), 1fr));
+}
+
+.bookmark-item.no-label,
+.folder-item.no-label {
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
 }
 
 .bookmark-item {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
-  text-decoration: none; color: var(--text); transition: background 0.15s, border-color 0.15s;
+  display: flex;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.bookmark-item:hover { background: var(--bg-hover); border-color: var(--accent); }
-
-.bookmark-item__favicon { width: 16px; height: 16px; flex-shrink: 0; }
-.bookmark-item__info { flex: 1; min-width: 0; }
-
-.bookmark-item__title {
-  font-size: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.bookmark-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
 }
 
-.bookmark-item__url {
-  font-size: 0.85em; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.bookmark-item__path { font-size: 0.75em; color: var(--text-muted); opacity: 0.7; margin-top: 1px; }
-
-/* ========================================
-   FOLDER ITEM
-   ======================================== */
 .folder-item {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
-  cursor: pointer; color: var(--text); transition: background 0.15s;
+  display: flex;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
   font-size: var(--font-size-content);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.folder-item:hover { background: var(--bg-hover); }
-.folder-item:hover .folder-svg { transform: scale(1.08); }
+.folder-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.folder-item:hover .folder-svg {
+  transform: scale(1.05);
+}
+
+/* Directional variants */
+.bookmark-item,
+.bookmark-item.label-pos-right,
+.folder-item,
+.folder-item.label-pos-right {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.bookmark-item.label-pos-left,
+.folder-item.label-pos-left {
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  text-align: right;
+}
+
+.bookmark-item.label-pos-bottom,
+.folder-item.label-pos-bottom {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 12px 10px;
+}
+
+.bookmark-item.label-pos-top,
+.folder-item.label-pos-top {
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 12px 10px;
+}
+
+/* Favicon, avatar & folder icon sizing */
+.bookmark-item__icon-wrap {
+  width: var(--bookmark-icon-size, 48px);
+  height: var(--bookmark-icon-size, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: max(3px, min(14px, calc(var(--bookmark-icon-size) * 0.16)));
+  overflow: hidden;
+  position: relative;
+  transition: background 0.15s;
+}
+
+.bookmark-item__icon-wrap.has-undersized-icon {
+  background: var(--bg-hover);
+}
+
+.bookmark-item__favicon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.bookmark-item__favicon.is-fullsize {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.bookmark-item__favicon.is-undersized {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Stylized Letter Avatar */
+.bookmark-item__letter-avatar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: calc(var(--bookmark-icon-size, 48px) * 0.44);
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  user-select: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
 
 .folder-item__icon {
+  width: var(--bookmark-icon-size, 48px);
+  height: var(--bookmark-icon-size, 48px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
   flex-shrink: 0;
 }
 
 .folder-item__icon .folder-svg {
-  width: 18px;
-  height: 18px;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.folder-item__title { font-size: inherit; font-weight: 500; }
-.folder-item__count { font-size: 0.85em; color: var(--text-muted); }
+/* Info containers */
+.bookmark-item__info {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+.folder-item__info {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.label-pos-bottom .folder-item__info,
+.label-pos-top .folder-item__info {
+  justify-content: center;
+}
+
+.label-pos-left .folder-item__info {
+  justify-content: flex-end;
+}
+
+.bookmark-item__title,
+.folder-item__title {
+  font-size: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.bookmark-item__url {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.bookmark-item__path {
+  font-size: 0.75em;
+  color: var(--text-muted);
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+.folder-item__count {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
 
 /* ========================================
    EXPLORER

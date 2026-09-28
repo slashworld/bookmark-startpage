@@ -58,6 +58,18 @@ let selectedFolderId = null;
     document.getElementById('fontSizeContent').value = s.fontSizeContent || 13;
     updateFontLabels();
 
+    // View settings
+    const iconSize = s.iconSize || 48;
+    const optSlider = document.getElementById('optIconSize');
+    if (optSlider) {
+      optSlider.value = iconSize;
+      document.getElementById('optIconSizeVal').textContent = `${iconSize}×${iconSize}`;
+      updateOptPresets(iconSize);
+      document.getElementById('optLabelPosition').value = s.labelPosition || 'right';
+      document.getElementById('optShowTitle').checked = s.showTitle !== false;
+      document.getElementById('optShowUrl').checked = s.showUrl !== false;
+    }
+
   } catch (err) {
     console.error('Init error:', err);
     document.getElementById('treePicker').innerHTML =
@@ -269,6 +281,46 @@ function updateFontLabels() {
   document.getElementById('fontSizeNavVal').textContent = document.getElementById('fontSizeNav').value + 'px';
   document.getElementById('fontSizeContentVal').textContent = document.getElementById('fontSizeContent').value + 'px';
 }
+
+// === View Settings ===
+
+function updateOptPresets(activeSize) {
+  const presets = document.getElementById('optPresets');
+  if (!presets) return;
+  presets.querySelectorAll('.view-popover__preset-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.size) === activeSize);
+  });
+}
+
+document.getElementById('optIconSize')?.addEventListener('input', function () {
+  const size = parseInt(this.value);
+  document.getElementById('optIconSizeVal').textContent = `${size}×${size}`;
+  updateOptPresets(size);
+});
+
+document.getElementById('optPresets')?.addEventListener('click', function (e) {
+  const btn = e.target.closest('.view-popover__preset-btn');
+  if (!btn) return;
+  const size = parseInt(btn.dataset.size);
+  document.getElementById('optIconSize').value = size;
+  document.getElementById('optIconSizeVal').textContent = `${size}×${size}`;
+  updateOptPresets(size);
+});
+
+async function saveViewSettings() {
+  const config = await Storage.load();
+  if (!config.settings) config.settings = {};
+
+  config.settings.iconSize = parseInt(document.getElementById('optIconSize').value) || 48;
+  config.settings.labelPosition = document.getElementById('optLabelPosition').value || 'right';
+  config.settings.showTitle = document.getElementById('optShowTitle').checked;
+  config.settings.showUrl = document.getElementById('optShowUrl').checked;
+
+  await Storage.save(config);
+  showStatus('viewSettingsStatus', '✓ ' + I18n.t('status.settingsSaved'), 'success');
+}
+
+document.getElementById('saveViewSettingsBtn')?.addEventListener('click', saveViewSettings);
 
 // === Config Save Button ===
 

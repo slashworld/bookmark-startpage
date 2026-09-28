@@ -617,6 +617,36 @@
       min-width: 36px;
       text-align: right;
     }
+
+    .view-popover__presets {
+      display: flex;
+      gap: 6px;
+      margin: 8px 0;
+    }
+
+    .view-popover__preset-btn {
+      flex: 1;
+      padding: 5px 0;
+      font-size: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .view-popover__preset-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text);
+    }
+
+    .view-popover__preset-btn.active {
+      background: var(--bg-active);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
   </style>
 </head>
 
@@ -694,6 +724,52 @@
       <button class="primary" id="saveSettingsBtn" data-i18n="common.save">💾 Сохранить</button>
     </div>
     <div class="status-msg" id="settingsStatus"></div>
+  </div>
+
+  <!-- Bookmark & Folder View Settings -->
+  <div class="section">
+    <h2 data-i18n="viewSettings.sectionTitle">🖼️ Отображение закладок и папок</h2>
+
+    <div class="setting-grid">
+      <span class="setting-grid__label" data-i18n="viewSettings.iconSize">Размер иконки:</span>
+      <input type="range" id="optIconSize" min="16" max="256" step="8" value="48" class="setting-grid__range">
+      <span class="setting-grid__val" id="optIconSizeVal">48×48</span>
+    </div>
+
+    <div class="view-popover__presets" id="optPresets" style="margin-bottom: 16px;">
+      <button type="button" class="view-popover__preset-btn" data-size="16">16</button>
+      <button type="button" class="view-popover__preset-btn" data-size="32">32</button>
+      <button type="button" class="view-popover__preset-btn active" data-size="48">48</button>
+      <button type="button" class="view-popover__preset-btn" data-size="64">64</button>
+      <button type="button" class="view-popover__preset-btn" data-size="128">128</button>
+      <button type="button" class="view-popover__preset-btn" data-size="256">256</button>
+    </div>
+
+    <div class="setting-row" style="margin-bottom: 8px;">
+      <span data-i18n="viewSettings.labelPosition">Расположение подписи:</span>
+      <select id="optLabelPosition" style="margin-left: 8px; padding: 4px 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius);">
+        <option value="right" data-i18n="viewSettings.posRight">Справа</option>
+        <option value="bottom" data-i18n="viewSettings.posBottom">Снизу</option>
+        <option value="left" data-i18n="viewSettings.posLeft">Слева</option>
+        <option value="top" data-i18n="viewSettings.posTop">Сверху</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <label class="setting-row" style="padding: 0; margin-right: 16px;">
+        <input type="checkbox" id="optShowTitle" checked>
+        <span data-i18n="viewSettings.showTitle">Заголовок</span>
+      </label>
+      <label class="setting-row" style="padding: 0;">
+        <input type="checkbox" id="optShowUrl" checked>
+        <span data-i18n="viewSettings.showUrl">URL</span>
+      </label>
+    </div>
+
+    <div class="btn-row" style="margin-top: 16px;">
+      <button class="primary" id="saveViewSettingsBtn" data-i18n="common.save">💾 Сохранить</button>
+    </div>
+    <div class="status-msg" id="viewSettingsStatus"></div>
   </div>
 
   <!-- Export / Import -->

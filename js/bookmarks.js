@@ -207,16 +207,102 @@ const Bookmarks = {
     return Bookmarks.findFolderByPath(path);
   },
 
-  getFavicon(url) {
+  isLocalUrl(url) {
     try {
       const u = new URL(url);
+      const host = u.hostname.toLowerCase();
+      return (
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host === '::1' ||
+        host.endsWith('.local') ||
+        host.endsWith('.lan') ||
+        host.endsWith('.internal') ||
+        host.endsWith('.home') ||
+        /^192\.168\./.test(host) ||
+        /^10\./.test(host) ||
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host) ||
+        !host.includes('.')
+      );
+    } catch {
+      return false;
+    }
+  },
+
+  getChromeFavicon(url, size = 48) {
+    try {
       if (chrome.runtime?.id) {
-        return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=16`;
+        return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=${size}`;
       }
-      return `https://www.google.com/s2/favicons?domain=${u.hostname}&sz=16`;
+      return '';
     } catch {
       return '';
     }
+  },
+
+  getGoogleFavicon(url, size = 48) {
+    try {
+      return `https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(url)}&size=${size}`;
+    } catch {
+      return '';
+    }
+  },
+
+  CHROME_FALLBACK_HASHES: new Set([
+    'AAAGSURBVAMAXWsWMPHGHasAAAAASUVORK5CYII=',
+    'AAZJREFUAwCNtDhfh02j2gAAAABJRU5ErkJggg==',
+    'AAAGSURBVAMA/6eXvT+A9ZYAAAAASUVORK5CYII='
+  ]),
+
+  _chromeFaviconCache: new Map(),
+
+  /**
+   * Check if Chrome's internal favicon database has a genuine icon for the given URL.
+   * Resolves to { hasRealIcon: boolean, width?: number, height?: number }.
+   */
+  async checkChromeFavicon(url, size = 48) {
+    const cacheKey = `${url}::${size}`;
+    if (Bookmarks._chromeFaviconCache.has(cacheKey)) {
+      return Bookmarks._chromeFaviconCache.get(cacheKey);
+    }
+
+    const src = Bookmarks.getChromeFavicon(url, size);
+    if (!src) return { hasRealIcon: false };
+
+    const promise = new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const dataUrl = canvas.toDataURL();
+          const end = dataUrl.slice(-40);
+          const isFallback = Bookmarks.CHROME_FALLBACK_HASHES.has(end);
+          resolve({
+            hasRealIcon: !isFallback,
+            width: img.naturalWidth,
+            height: img.naturalHeight
+          });
+        } catch {
+          resolve({ hasRealIcon: false });
+        }
+      };
+      img.onerror = () => resolve({ hasRealIcon: false });
+      img.src = src;
+    });
+
+    Bookmarks._chromeFaviconCache.set(cacheKey, promise);
+    return promise;
+  },
+
+  getFavicon(url, size = 48) {
+    if (Bookmarks.isLocalUrl(url)) {
+      return Bookmarks.getChromeFavicon(url, size);
+    }
+    return Bookmarks.getGoogleFavicon(url, size);
   },
 
   // ==================== CRUD ====================

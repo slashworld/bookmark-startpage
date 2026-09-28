@@ -39,12 +39,85 @@
     </div>
   </main>
 
-  <!-- Bottom bar: open in new tab -->
+  <!-- Bottom bar: open in new tab & view settings -->
   <footer class="bottom-bar">
     <label class="bottom-bar__toggle">
       <input type="checkbox" id="openInNewTab" checked>
       <span data-i18n="settings.openInNewTab">Открывать URL в новой вкладке</span>
     </label>
+    <div class="bottom-bar__view-wrap">
+      <button type="button" class="bottom-bar__view-btn" id="viewSettingsBtn" data-i18n-title="viewSettings.title" title="Настройка вида">
+        <span>🎨</span>
+        <span data-i18n="viewSettings.button">Вид</span>
+      </button>
+      <div class="view-popover" id="viewSettingsPopover" hidden>
+        <div class="view-popover__title">
+          <span>🎨</span>
+          <span data-i18n="viewSettings.title">Настройка вида карточек</span>
+        </div>
+        
+        <!-- Icon size -->
+        <div class="view-popover__row">
+          <div class="view-popover__label-header">
+            <span data-i18n="viewSettings.iconSize">Размер иконки</span>
+            <span class="view-popover__size-val" id="popoverIconSizeVal">48×48</span>
+          </div>
+          <div class="view-popover__slider-wrap">
+            <input type="range" class="view-popover__slider" id="popoverIconSize" min="16" max="256" step="8" value="48">
+          </div>
+          <div class="view-popover__presets" id="popoverPresets">
+            <button type="button" class="view-popover__preset-btn" data-size="16">16</button>
+            <button type="button" class="view-popover__preset-btn" data-size="32">32</button>
+            <button type="button" class="view-popover__preset-btn active" data-size="48">48</button>
+            <button type="button" class="view-popover__preset-btn" data-size="64">64</button>
+            <button type="button" class="view-popover__preset-btn" data-size="128">128</button>
+            <button type="button" class="view-popover__preset-btn" data-size="256">256</button>
+          </div>
+        </div>
+
+        <!-- Label position -->
+        <div class="view-popover__row">
+          <div class="view-popover__label-header">
+            <span data-i18n="viewSettings.labelPosition">Расположение подписи</span>
+          </div>
+          <div class="view-popover__pos-group" id="popoverPosGroup">
+            <button type="button" class="view-popover__pos-btn" data-pos="top">
+              <span>⬆️</span>
+              <span data-i18n="viewSettings.posTop">Сверху</span>
+            </button>
+            <button type="button" class="view-popover__pos-btn" data-pos="bottom">
+              <span>⬇️</span>
+              <span data-i18n="viewSettings.posBottom">Снизу</span>
+            </button>
+            <button type="button" class="view-popover__pos-btn" data-pos="left">
+              <span>⬅️</span>
+              <span data-i18n="viewSettings.posLeft">Слева</span>
+            </button>
+            <button type="button" class="view-popover__pos-btn active" data-pos="right">
+              <span>➡️</span>
+              <span data-i18n="viewSettings.posRight">Справа</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Title and URL toggles -->
+        <div class="view-popover__row">
+          <div class="view-popover__label-header">
+            <span data-i18n="viewSettings.elements">Элементы подписи</span>
+          </div>
+          <div class="view-popover__checkboxes">
+            <label class="view-popover__checkbox-label">
+              <input type="checkbox" id="popoverShowTitle" checked>
+              <span data-i18n="viewSettings.showTitle">Заголовок</span>
+            </label>
+            <label class="view-popover__checkbox-label">
+              <input type="checkbox" id="popoverShowUrl" checked>
+              <span data-i18n="viewSettings.showUrl">URL</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
   </footer>
 
   <!-- Context menu -->

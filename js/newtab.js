@@ -83,6 +83,7 @@ document.addEventListener('visibilitychange', () => {
   Modal.init();
   Filter.init();
   Selection.init();
+  initViewSettings();
   await initGlobalSettings();
   await Render.renderAll();
 
@@ -112,6 +113,7 @@ document.addEventListener('visibilitychange', () => {
     const cfg = await Storage.load();
     if (!cfg.settings) cfg.settings = { ...Storage.DEFAULT_CONFIG.settings };
     cfg.settings.openInNewTab = e.target.checked;
+    lastKnownSettingsJson = JSON.stringify(cfg.settings);
     await Storage.save(cfg);
     await Render.renderContent();
   });
@@ -138,7 +140,132 @@ document.addEventListener('visibilitychange', () => {
       await Render.renderAll();
     }
   });
+
+  // Expose updater for storage sync
+  window._updateViewSettingsUI = syncViewSettingsUI;
 })();
+
+function syncViewSettingsUI(s) {
+  const slider = document.getElementById('popoverIconSize');
+  const sizeVal = document.getElementById('popoverIconSizeVal');
+  const presets = document.getElementById('popoverPresets');
+  const posGroup = document.getElementById('popoverPosGroup');
+  const showTitleCb = document.getElementById('popoverShowTitle');
+  const showUrlCb = document.getElementById('popoverShowUrl');
+
+  if (!slider || !presets || !posGroup) return;
+
+  const size = s.iconSize || 48;
+  slider.value = size;
+  if (sizeVal) sizeVal.textContent = `${size}×${size}`;
+
+  presets.querySelectorAll('.view-popover__preset-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.size) === size);
+  });
+
+  const pos = s.labelPosition || 'right';
+  posGroup.querySelectorAll('.view-popover__pos-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.pos === pos);
+  });
+
+  if (showTitleCb) showTitleCb.checked = s.showTitle !== false;
+  if (showUrlCb) showUrlCb.checked = s.showUrl !== false;
+}
+
+function initViewSettings() {
+  const btn = document.getElementById('viewSettingsBtn');
+  const popover = document.getElementById('viewSettingsPopover');
+  const slider = document.getElementById('popoverIconSize');
+  const sizeVal = document.getElementById('popoverIconSizeVal');
+  const presets = document.getElementById('popoverPresets');
+  const posGroup = document.getElementById('popoverPosGroup');
+  const showTitleCb = document.getElementById('popoverShowTitle');
+  const showUrlCb = document.getElementById('popoverShowUrl');
+
+  if (!btn || !popover) return;
+
+  // Toggle popover
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = popover.hidden;
+    popover.hidden = !isHidden;
+    btn.classList.toggle('active', !popover.hidden);
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!popover.hidden && !popover.contains(e.target) && !btn.contains(e.target)) {
+      popover.hidden = true;
+      btn.classList.remove('active');
+    }
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !popover.hidden) {
+      popover.hidden = true;
+      btn.classList.remove('active');
+    }
+  });
+
+  // Helper to save settings and update content
+  const saveAndRender = async (updates) => {
+    const currentCfg = await Storage.load();
+    if (!currentCfg.settings) currentCfg.settings = { ...Storage.DEFAULT_CONFIG.settings };
+    Object.assign(currentCfg.settings, updates);
+    await Storage.save(currentCfg);
+    await Render.renderContent();
+  };
+
+  // Slider change
+  slider.addEventListener('input', () => {
+    const size = parseInt(slider.value);
+    sizeVal.textContent = `${size}×${size}`;
+    presets.querySelectorAll('.view-popover__preset-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.size) === size);
+    });
+    document.documentElement.style.setProperty('--bookmark-icon-size', size + 'px');
+  });
+
+  slider.addEventListener('change', async () => {
+    const size = parseInt(slider.value);
+    await saveAndRender({ iconSize: size });
+  });
+
+  // Preset buttons
+  presets.addEventListener('click', async (e) => {
+    const pBtn = e.target.closest('.view-popover__preset-btn');
+    if (!pBtn) return;
+    const size = parseInt(pBtn.dataset.size);
+    slider.value = size;
+    sizeVal.textContent = `${size}×${size}`;
+    presets.querySelectorAll('.view-popover__preset-btn').forEach(b => {
+      b.classList.toggle('active', b === pBtn);
+    });
+    document.documentElement.style.setProperty('--bookmark-icon-size', size + 'px');
+    await saveAndRender({ iconSize: size });
+  });
+
+  // Label position buttons
+  posGroup.addEventListener('click', async (e) => {
+    const posBtn = e.target.closest('.view-popover__pos-btn');
+    if (!posBtn) return;
+    const pos = posBtn.dataset.pos;
+    posGroup.querySelectorAll('.view-popover__pos-btn').forEach(b => {
+      b.classList.toggle('active', b === posBtn);
+    });
+    await saveAndRender({ labelPosition: pos });
+  });
+
+  // Checkboxes
+  showTitleCb.addEventListener('change', async () => {
+    await saveAndRender({ showTitle: showTitleCb.checked });
+  });
+
+  showUrlCb.addEventListener('change', async () => {
+    await saveAndRender({ showUrl: showUrlCb.checked });
+  });
+}
 
 let _syncListenerAttached = false;
 function setupSyncListener() {
@@ -175,6 +302,7 @@ async function initGlobalSettings() {
   const config = await Storage.load();
   const s = config.settings || Storage.DEFAULT_CONFIG.settings;
   document.getElementById('openInNewTab').checked = s.openInNewTab !== false;
+  syncViewSettingsUI(s);
 }
 
 async function applyUrlImport(data) {

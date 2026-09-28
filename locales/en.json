@@ -153,5 +153,19 @@
     "auto": "System theme",
     "light": "Light theme",
     "dark": "Dark theme"
+  },
+  "viewSettings": {
+    "button": "View",
+    "title": "Card view settings",
+    "sectionTitle": "Bookmark & Folder View",
+    "iconSize": "Icon size",
+    "labelPosition": "Label position",
+    "posRight": "Right",
+    "posBottom": "Bottom",
+    "posLeft": "Left",
+    "posTop": "Top",
+    "elements": "Label elements",
+    "showTitle": "Title",
+    "showUrl": "URL address"
   }
 }

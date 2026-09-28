@@ -17,14 +17,24 @@ const Storage = {
       fontSizeTabs: 13,
       fontSizeNav: 13,
       fontSizeContent: 13,
-      language: null  // null = auto-detect on first run, 'en' or 'ru' for specific
+      language: null, // null = auto-detect on first run, 'en' or 'ru' for specific
+      iconSize: 48,
+      labelPosition: 'right', // 'right' | 'bottom' | 'left' | 'top'
+      showTitle: true,
+      showUrl: true
     }
   },
 
   async load() {
     return new Promise(resolve => {
       chrome.storage.local.get('bsp_config', (result) => {
-        resolve(result.bsp_config || { ...Storage.DEFAULT_CONFIG });
+        if (!result.bsp_config) {
+          resolve({ ...Storage.DEFAULT_CONFIG });
+          return;
+        }
+        const cfg = result.bsp_config;
+        cfg.settings = { ...Storage.DEFAULT_CONFIG.settings, ...(cfg.settings || {}) };
+        resolve(cfg);
       });
     });
   },
