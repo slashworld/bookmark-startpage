@@ -497,11 +497,25 @@ const Render = {
     let fallbackTried = false;
     const handleLoadedImage = () => {
       const isGoogle = img.src.includes('t0.gstatic.com') || img.src.includes('faviconV2');
-      if (isGoogle && !fallbackTried && img.naturalWidth <= 16) {
-        Bookmarks.checkChromeFavicon(bm.url, iconSize).then((res) => {
-          if (res.hasRealIcon) {
-            fallbackTried = true;
-            img.src = Bookmarks.getChromeFavicon(bm.url, iconSize);
+      const isChrome = img.src.startsWith('chrome-extension://');
+
+      // If Google returned 16px fallback, OR if Chrome returned an undersized icon:
+      // Try resolving direct high-resolution icon from the website HTML (SVG, Apple touch icon, high-res PNG)
+      if (!fallbackTried && ((isGoogle && img.naturalWidth <= 16) || (isChrome && img.naturalWidth < iconSize))) {
+        fallbackTried = true;
+        Bookmarks.resolveDirectIcon(bm.url).then((directIcon) => {
+          if (directIcon && img.src !== directIcon) {
+            img.src = directIcon;
+            return;
+          }
+          if (isGoogle) {
+            Bookmarks.checkChromeFavicon(bm.url, iconSize).then((res) => {
+              if (res.hasRealIcon) {
+                img.src = Bookmarks.getChromeFavicon(bm.url, iconSize);
+              } else {
+                applySizing();
+              }
+            });
           } else {
             applySizing();
           }
@@ -516,20 +530,25 @@ const Render = {
     };
 
     img.onerror = () => {
-      // Step 2 fallback: If this was Google and not local, try Chrome's local _favicon
-      if (!fallbackTried && !Bookmarks.isLocalUrl(bm.url)) {
+      const isGoogle = img.src.includes('t0.gstatic.com') || img.src.includes('faviconV2');
+      if (isGoogle && !fallbackTried && !Bookmarks.isLocalUrl(bm.url)) {
         fallbackTried = true;
-        Bookmarks.checkChromeFavicon(bm.url, iconSize).then((res) => {
-          if (res.hasRealIcon) {
-            img.src = Bookmarks.getChromeFavicon(bm.url, iconSize);
+        Bookmarks.resolveDirectIcon(bm.url).then((directIcon) => {
+          if (directIcon && img.src !== directIcon) {
+            img.src = directIcon;
             return;
           }
-          img.remove();
-          iconWrap.appendChild(Render.createLetterAvatar(bm));
+          Bookmarks.checkChromeFavicon(bm.url, iconSize).then((res) => {
+            if (res.hasRealIcon) {
+              img.src = Bookmarks.getChromeFavicon(bm.url, iconSize);
+              return;
+            }
+            img.remove();
+            iconWrap.appendChild(Render.createLetterAvatar(bm));
+          });
         });
         return;
       }
-      // Step 3 fallback: If local Chrome API also failed or no icon available, show styled letter avatar
       img.remove();
       iconWrap.appendChild(Render.createLetterAvatar(bm));
     };
@@ -882,11 +901,17 @@ const Render = {
           const handleTreeFavicon = () => {
             const isGoogle = fav.src.includes('t0.gstatic.com') || fav.src.includes('faviconV2');
             if (isGoogle && !treeFallbackDone) {
-              Bookmarks.checkChromeFavicon(lk.url, 16).then((res) => {
-                if (res.hasRealIcon) {
-                  treeFallbackDone = true;
-                  fav.src = Bookmarks.getChromeFavicon(lk.url, 16);
+              treeFallbackDone = true;
+              Bookmarks.resolveDirectIcon(lk.url).then((directIcon) => {
+                if (directIcon && fav.src !== directIcon) {
+                  fav.src = directIcon;
+                  return;
                 }
+                Bookmarks.checkChromeFavicon(lk.url, 16).then((res) => {
+                  if (res.hasRealIcon) {
+                    fav.src = Bookmarks.getChromeFavicon(lk.url, 16);
+                  }
+                });
               });
             }
           };
@@ -896,14 +921,20 @@ const Render = {
           };
 
           fav.onerror = () => {
-            if (!treeFallbackDone && !Bookmarks.isLocalUrl(lk.url)) {
+            if (!treeFallbackDone) {
               treeFallbackDone = true;
-              Bookmarks.checkChromeFavicon(lk.url, 16).then((res) => {
-                if (res.hasRealIcon) {
-                  fav.src = Bookmarks.getChromeFavicon(lk.url, 16);
+              Bookmarks.resolveDirectIcon(lk.url).then((directIcon) => {
+                if (directIcon && fav.src !== directIcon) {
+                  fav.src = directIcon;
                   return;
                 }
-                fav.style.display = 'none';
+                Bookmarks.checkChromeFavicon(lk.url, 16).then((res) => {
+                  if (res.hasRealIcon) {
+                    fav.src = Bookmarks.getChromeFavicon(lk.url, 16);
+                    return;
+                  }
+                  fav.style.display = 'none';
+                });
               });
               return;
             }

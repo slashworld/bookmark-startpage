@@ -45,6 +45,30 @@ const Storage = {
     });
   },
 
+  async getSiteIcons() {
+    return new Promise(resolve => {
+      chrome.storage.local.get('bsp_site_icons', (result) => {
+        resolve(result.bsp_site_icons || {});
+      });
+    });
+  },
+
+  async saveSiteIcon(url, iconUrl) {
+    const icons = await Storage.getSiteIcons();
+    icons[url] = iconUrl;
+    return new Promise(resolve => {
+      chrome.storage.local.set({ bsp_site_icons: icons }, resolve);
+    });
+  },
+
+  async deleteSiteIcon(url) {
+    const icons = await Storage.getSiteIcons();
+    delete icons[url];
+    return new Promise(resolve => {
+      chrome.storage.local.set({ bsp_site_icons: icons }, resolve);
+    });
+  },
+
   /**
    * Serialize config to a structured JavaScript object.
    * Uses structured path info (fullPath + relativePath + topFolderIndex)

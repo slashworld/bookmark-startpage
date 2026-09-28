@@ -271,22 +271,23 @@ def main():
         // Wait for image onload and upgrade
         await new Promise(r => setTimeout(r, 600));
 
-        const isChromeSrc = img.src.startsWith('chrome-extension://');
+        const isUpgraded = img.src.startsWith('chrome-extension://') || img.src.includes('abvgde');
         const naturalW = img.naturalWidth;
         card.remove();
 
         return {
             jfHasRealIcon: jfCheck.hasRealIcon,
             fakeHasRealIcon: fakeCheck.hasRealIcon,
-            cardUpgradedToChrome: isChromeSrc,
+            cardUpgraded: isUpgraded,
+            cardSrc: img.src,
             cardNaturalWidth: naturalW
         };
     })()
     """)
-    print("[6d] Smart Google Fallback to Chrome cache for custom domains:", json.dumps(res6d, indent=2))
+    print("[6d] Smart Google Fallback to Chrome cache & Direct site icon for custom domains:", json.dumps(res6d, indent=2))
     assert res6d["jfHasRealIcon"] == True, "Chrome cache must recognize real icon for jf.nas.abvgde.xyz"
     assert res6d["fakeHasRealIcon"] == False, "Chrome cache must detect fallback globe for nonexistent domain"
-    assert res6d["cardUpgradedToChrome"] == True, "Bookmark card must upgrade to Chrome cache when Google returns 16px"
+    assert res6d["cardUpgraded"] == True, "Bookmark card must upgrade to direct site icon or Chrome cache when Google returns 16px"
     assert res6d["cardNaturalWidth"] >= 48, f"Card naturalWidth must be >= 48, got {res6d['cardNaturalWidth']}"
 
     # 7. Restore defaults

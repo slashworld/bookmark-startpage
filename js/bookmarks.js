@@ -255,6 +255,23 @@ const Bookmarks = {
   ]),
 
   _chromeFaviconCache: new Map(),
+  _directIconCache: new Map(),
+
+  /**
+   * Pre-load saved site icons from Storage into memory cache.
+   */
+  async initDirectIcons() {
+    if (typeof Storage !== 'undefined') {
+      try {
+        const saved = await Storage.getSiteIcons();
+        for (const [url, iconUrl] of Object.entries(saved)) {
+          Bookmarks._directIconCache.set(url, iconUrl);
+        }
+      } catch (e) {
+        console.warn('Failed to load site icons cache:', e);
+      }
+    }
+  },
 
   /**
    * Check if Chrome's internal favicon database has a genuine icon for the given URL.
@@ -298,7 +315,127 @@ const Bookmarks = {
     return promise;
   },
 
+  /**
+   * Directly scrape and resolve the highest resolution icon from website HTML.
+   * Finds vector SVGs, Apple Touch Icons (180x180), or high-res PNG icons.
+   * @param {string} pageUrl
+   * @param {boolean} forceRefresh
+   * @returns {Promise<string|null>}
+   */
+  async resolveDirectIcon(pageUrl, forceRefresh = false) {
+    if (!pageUrl || !pageUrl.startsWith('http')) return null;
+
+    if (!forceRefresh && Bookmarks._directIconCache.has(pageUrl)) {
+      return Bookmarks._directIconCache.get(pageUrl);
+    }
+
+    if (!forceRefresh && typeof Storage !== 'undefined') {
+      try {
+        const savedIcons = await Storage.getSiteIcons();
+        if (savedIcons[pageUrl]) {
+          Bookmarks._directIconCache.set(pageUrl, savedIcons[pageUrl]);
+          return savedIcons[pageUrl];
+        }
+      } catch {}
+    }
+
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 4000);
+      const resp = await fetch(pageUrl, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!resp.ok) return null;
+
+      const html = await resp.text();
+      const baseUrl = resp.url || pageUrl;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      const links = Array.from(doc.querySelectorAll("link[rel*='icon'], link[rel='apple-touch-icon'], link[rel='apple-touch-icon-precomposed'], meta[name='msapplication-TileImage'], meta[property='og:image']"));
+
+      const candidates = [];
+      for (const el of links) {
+        const rel = (el.getAttribute('rel') || el.getAttribute('name') || el.getAttribute('property') || '').toLowerCase();
+        const href = el.getAttribute('href') || el.getAttribute('content');
+        if (!href) continue;
+
+        let fullUrl;
+        try {
+          fullUrl = new URL(href, baseUrl).href;
+        } catch {
+          continue;
+        }
+
+        const sizes = el.getAttribute('sizes') || '';
+        const type = (el.getAttribute('type') || '').toLowerCase();
+
+        let parsedSize = 0;
+        if (sizes) {
+          const m = sizes.match(/(\d+)x(\d+)/i);
+          if (m) parsedSize = parseInt(m[1], 10);
+        }
+
+        let priority = 100;
+        if (type === 'image/svg+xml' || fullUrl.endsWith('.svg')) {
+          priority = 10000;
+        } else if (rel.includes('apple-touch-icon')) {
+          priority = 5000 + (parsedSize || 180);
+        } else if (parsedSize >= 64) {
+          priority = 3000 + parsedSize;
+        } else if (parsedSize >= 32) {
+          priority = 2000 + parsedSize;
+        } else {
+          priority = 1000 + parsedSize;
+        }
+
+        candidates.push({ fullUrl, priority, type, rel, parsedSize });
+      }
+
+      candidates.sort((a, b) => b.priority - a.priority);
+
+      let bestIconUrl = null;
+      if (candidates.length > 0) {
+        bestIconUrl = candidates[0].fullUrl;
+      } else {
+        const u = new URL(pageUrl);
+        const rootFallbacks = [
+          `${u.origin}/favicon.svg`,
+          `${u.origin}/apple-touch-icon.png`,
+          `${u.origin}/apple-touch-icon-precomposed.png`,
+          `${u.origin}/favicon.ico`
+        ];
+        for (const fb of rootFallbacks) {
+          const ok = await new Promise(res => {
+            const img = new Image();
+            img.onload = () => res(true);
+            img.onerror = () => res(false);
+            img.src = fb;
+          });
+          if (ok) {
+            bestIconUrl = fb;
+            break;
+          }
+        }
+      }
+
+      if (bestIconUrl) {
+        Bookmarks._directIconCache.set(pageUrl, bestIconUrl);
+        if (typeof Storage !== 'undefined') {
+          await Storage.saveSiteIcon(pageUrl, bestIconUrl);
+        }
+        return bestIconUrl;
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  },
+
   getFavicon(url, size = 48) {
+    if (Bookmarks._directIconCache.has(url)) {
+      return Bookmarks._directIconCache.get(url);
+    }
     if (Bookmarks.isLocalUrl(url)) {
       return Bookmarks.getChromeFavicon(url, size);
     }

@@ -62,6 +62,8 @@ const ContextMenu = {
     ContextMenu.currentType = 'bookmark';
 
     ContextMenu.menu.innerHTML = `
+      <button class="ctx-menu__item" data-action="refresh-site-icon">🔄 ${I18n.t('bookmarks.refreshIcon')}</button>
+      <div class="ctx-menu__separator"></div>
       <button class="ctx-menu__item" data-action="edit-bookmark">✏️ ${I18n.t('bookmarks.edit')}</button>
       <button class="ctx-menu__item ctx-menu__item--danger" data-action="delete-bookmark">🗑️ ${I18n.t('bookmarks.delete')}</button>
     `;
@@ -229,13 +231,24 @@ const ContextMenu = {
         break;
 
       // --- Bookmark actions ---
+      case 'refresh-site-icon':
+        if (target && target.url) {
+          await Bookmarks.resolveDirectIcon(target.url, true);
+          await Render.renderContent();
+        }
+        break;
+
       case 'edit-bookmark':
         if (target) {
+          const savedIcons = typeof Storage !== 'undefined' ? (await Storage.getSiteIcons()) : {};
+          const currentIcon = (target.url && savedIcons[target.url]) ? savedIcons[target.url] : '';
+
           Modal.open({
             title: I18n.t('bookmarks.edit'),
             fields: [
               { id: 'title', label: I18n.t('bookmarks.title'), value: target.title || '' },
-              { id: 'url', label: I18n.t('bookmarks.url'), value: target.url || '', type: 'url' }
+              { id: 'url', label: I18n.t('bookmarks.url'), value: target.url || '', type: 'url' },
+              { id: 'customIcon', label: I18n.t('bookmarks.customIcon'), value: currentIcon, type: 'url' }
             ],
             onSave: async (vals) => {
               const changes = {};
@@ -243,8 +256,20 @@ const ContextMenu = {
               if (vals.url.trim()) changes.url = vals.url.trim();
               if (Object.keys(changes).length > 0) {
                 await Bookmarks.update(target.id, changes);
-                await Render.renderAll();
               }
+
+              const newUrl = (vals.url && vals.url.trim()) || target.url;
+              const newIcon = (vals.customIcon || '').trim();
+
+              if (newIcon) {
+                await Storage.saveSiteIcon(newUrl, newIcon);
+                Bookmarks._directIconCache.set(newUrl, newIcon);
+              } else if (currentIcon) {
+                await Storage.deleteSiteIcon(target.url);
+                Bookmarks._directIconCache.delete(target.url);
+              }
+
+              await Render.renderAll();
             }
           });
         }

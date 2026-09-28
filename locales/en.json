@@ -66,6 +66,8 @@
     "edit": "Edit bookmark",
     "delete": "Delete bookmark",
     "deleteConfirm": "Delete bookmark «{title}»?",
+    "refreshIcon": "Refresh icon from site",
+    "customIcon": "Icon URL (optional)",
     "title": "Title",
     "url": "URL"
   },

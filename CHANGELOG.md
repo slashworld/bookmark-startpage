@@ -21,6 +21,8 @@ All notable changes to this project will be documented in this file.
 - Smart Crisp Display: icons smaller than requested size (e.g. 16px or 32px when 64px is chosen) are centered 1:1 in a dedicated container without blurry upscaling
 - Multi-tier favicon fallback: Google Favicon API with automatic Chrome local cache dispatch for intranet/internal URLs (`localhost`, private IPs, `.local`), and stylized vector letter avatars with deterministic Catppuccin gradients for sites without icons
 - Smart custom domain & NAS fallback: detects Google Favicon API 16px fallback on unindexed/private domains (e.g. DDNS, personal domains like `jf.nas.abvgde.xyz`) and seamlessly upgrades to Chrome's local favicon cache for visited sites
+- Direct Site Icon Scraper: automatic background extraction of genuine high-resolution icons (vector SVGs, Apple Touch Icons up to 180×180, and large PNGs) directly from website HTML, eliminating blurry upscaled 32px bitmaps for self-hosted services like qBittorrent and Jellyfin
+- Bookmark context menu action «Обновить иконку с сайта» (Refresh icon from site) and custom icon URL input in the edit bookmark modal
 
 ### Changed
 - Split monolithic stylesheet into modular CSS files (`theme.css`, `layout.css`, `explorer.css`, `modals.css`, `dnd.css`) with `newtab.css` acting as the master import hub for clean maintainability

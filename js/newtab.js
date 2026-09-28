@@ -85,6 +85,7 @@ document.addEventListener('visibilitychange', () => {
   Selection.init();
   initViewSettings();
   await initGlobalSettings();
+  await Bookmarks.initDirectIcons();
   await Render.renderAll();
 
   // If still empty (e.g. bookmarks are still syncing in the background after fresh sign-in),
