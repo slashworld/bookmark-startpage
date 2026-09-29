@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2026-09-26
+## [1.1.0] - 2026-09-29
 
 ### Added
 - JSON file export and import for settings and tabs
