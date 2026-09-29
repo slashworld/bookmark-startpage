@@ -300,32 +300,41 @@
 
 .bottom-bar__toggle input { accent-color: var(--accent); }
 
+.view-settings-float,
 .bottom-bar__view-wrap {
   position: absolute;
-  right: 16px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 50;
   display: flex;
   align-items: center;
 }
 
+.view-settings-float__btn,
 .bottom-bar__view-btn {
-  background: var(--bg);
+  background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
   font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  padding: 4px 10px;
+  padding: 5px 12px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   transition: all 0.15s;
 }
 
+.view-settings-float__btn:hover,
 .bottom-bar__view-btn:hover {
   background: var(--bg-hover);
   border-color: var(--accent);
+  color: var(--accent);
 }
 
+.view-settings-float__btn.active,
 .bottom-bar__view-btn.active {
   background: var(--bg-active);
   border-color: var(--accent);
@@ -335,7 +344,7 @@
 /* View settings popover */
 .view-popover {
   position: absolute;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + 8px);
   right: 0;
   width: 300px;
   background: var(--bg-surface);
@@ -463,19 +472,36 @@
 
 .view-popover__checkboxes {
   display: flex;
-  gap: 14px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .view-popover__checkbox-label {
-  font-size: 12px;
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   cursor: pointer;
   user-select: none;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.view-popover__checkbox-label input {
+.view-popover__checkbox-label:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.view-popover__checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
   accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
 }

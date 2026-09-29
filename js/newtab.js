@@ -218,9 +218,18 @@ function initViewSettings() {
     await Render.renderContent();
   };
 
+  const STANDARD_ICON_SIZES = [16, 32, 48, 64, 128, 256];
+  const snapToStandardIconSize = (val) => {
+    const num = parseInt(val, 10);
+    return STANDARD_ICON_SIZES.reduce((prev, curr) =>
+      Math.abs(curr - num) < Math.abs(prev - num) ? curr : prev
+    );
+  };
+
   // Slider change
   slider.addEventListener('input', () => {
-    const size = parseInt(slider.value);
+    const size = snapToStandardIconSize(slider.value);
+    slider.value = size;
     sizeVal.textContent = `${size}×${size}`;
     presets.querySelectorAll('.view-popover__preset-btn').forEach(b => {
       b.classList.toggle('active', parseInt(b.dataset.size) === size);
@@ -229,7 +238,8 @@ function initViewSettings() {
   });
 
   slider.addEventListener('change', async () => {
-    const size = parseInt(slider.value);
+    const size = snapToStandardIconSize(slider.value);
+    slider.value = size;
     await saveAndRender({ iconSize: size });
   });
 

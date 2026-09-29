@@ -292,8 +292,17 @@ function updateOptPresets(activeSize) {
   });
 }
 
+const STANDARD_ICON_SIZES = [16, 32, 48, 64, 128, 256];
+function snapToStandardIconSize(val) {
+  const num = parseInt(val, 10);
+  return STANDARD_ICON_SIZES.reduce((prev, curr) =>
+    Math.abs(curr - num) < Math.abs(prev - num) ? curr : prev
+  );
+}
+
 document.getElementById('optIconSize')?.addEventListener('input', function () {
-  const size = parseInt(this.value);
+  const size = snapToStandardIconSize(this.value);
+  this.value = size;
   document.getElementById('optIconSizeVal').textContent = `${size}×${size}`;
   updateOptPresets(size);
 });

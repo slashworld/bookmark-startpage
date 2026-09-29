@@ -732,7 +732,15 @@
 
     <div class="setting-grid">
       <span class="setting-grid__label" data-i18n="viewSettings.iconSize">Размер иконки:</span>
-      <input type="range" id="optIconSize" min="16" max="256" step="8" value="48" class="setting-grid__range">
+      <input type="range" id="optIconSize" min="16" max="256" step="8" list="opt-icon-size-presets" value="48" class="setting-grid__range">
+      <datalist id="opt-icon-size-presets">
+        <option value="16"></option>
+        <option value="32"></option>
+        <option value="48"></option>
+        <option value="64"></option>
+        <option value="128"></option>
+        <option value="256"></option>
+      </datalist>
       <span class="setting-grid__val" id="optIconSizeVal">48×48</span>
     </div>
 
@@ -745,9 +753,9 @@
       <button type="button" class="view-popover__preset-btn" data-size="256">256</button>
     </div>
 
-    <div class="setting-row" style="margin-bottom: 8px;">
+    <div class="setting-row" style="margin-bottom: 12px;">
       <span data-i18n="viewSettings.labelPosition">Расположение подписи:</span>
-      <select id="optLabelPosition" style="margin-left: 8px; padding: 4px 8px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius);">
+      <select id="optLabelPosition" style="margin-left: 8px; padding: 6px 10px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px;">
         <option value="right" data-i18n="viewSettings.posRight">Справа</option>
         <option value="bottom" data-i18n="viewSettings.posBottom">Снизу</option>
         <option value="left" data-i18n="viewSettings.posLeft">Слева</option>
@@ -755,13 +763,13 @@
       </select>
     </div>
 
-    <div class="setting-row">
-      <label class="setting-row" style="padding: 0; margin-right: 16px;">
-        <input type="checkbox" id="optShowTitle" checked>
+    <div class="setting-row" style="display: flex; gap: 12px; margin-bottom: 8px;">
+      <label style="padding: 8px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500;">
+        <input type="checkbox" id="optShowTitle" checked style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
         <span data-i18n="viewSettings.showTitle">Заголовок</span>
       </label>
-      <label class="setting-row" style="padding: 0;">
-        <input type="checkbox" id="optShowUrl" checked>
+      <label style="padding: 8px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500;">
+        <input type="checkbox" id="optShowUrl" checked style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
         <span data-i18n="viewSettings.showUrl">URL</span>
       </label>
     </div>

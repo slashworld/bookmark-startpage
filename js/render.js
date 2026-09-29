@@ -213,6 +213,14 @@ const Render = {
       Render.buildNodeDepths(folderNode);
       const viewMode = activeTab.viewMode || 'explorer';
 
+      const viewWrap = Render._viewSettingsWrap || document.getElementById('viewSettingsWrap');
+      if (viewWrap) {
+        Render._viewSettingsWrap = viewWrap;
+        if (viewWrap.parentElement) {
+          viewWrap.remove();
+        }
+      }
+
       area.innerHTML = '';
 
       // Apply font sizes and icon size
@@ -341,6 +349,9 @@ const Render = {
 
   createGroupedBookmarksList(rootNode) {
     Render.currentExplorerNode = rootNode;
+    const wrap = document.createElement('div');
+    wrap.className = 'grouped-list-wrap';
+
     const c = document.createElement('div');
     c.className = 'grouped-list';
     const t = Render.linkTarget();
@@ -363,7 +374,14 @@ const Render = {
     if (c.children.length === 0) {
       c.appendChild(Render.createEmptyFolderState(rootNode));
     }
-    return c;
+    wrap.appendChild(c);
+
+    const viewWrap = Render._viewSettingsWrap || document.getElementById('viewSettingsWrap');
+    if (viewWrap) {
+      wrap.appendChild(viewWrap);
+    }
+
+    return wrap;
   },
 
   _groups(container, node, target, depth) {
@@ -701,11 +719,21 @@ const Render = {
     tree.appendChild(Render.treeNode(rootNode, 0, true, showLinks, activeNode.id));
     ex.appendChild(tree);
 
+    const contentWrap = document.createElement('div');
+    contentWrap.className = 'explorer__content-wrap';
+
     const content = document.createElement('div');
     content.className = 'explorer__content';
     content.id = 'explorerContent';
     Render.folderContent(content, activeNode);
-    ex.appendChild(content);
+    contentWrap.appendChild(content);
+
+    const viewWrap = Render._viewSettingsWrap || document.getElementById('viewSettingsWrap');
+    if (viewWrap) {
+      contentWrap.appendChild(viewWrap);
+    }
+
+    ex.appendChild(contentWrap);
 
     return ex;
   },

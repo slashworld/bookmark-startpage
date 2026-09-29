@@ -45,8 +45,10 @@
       <input type="checkbox" id="openInNewTab" checked>
       <span data-i18n="settings.openInNewTab">Открывать URL в новой вкладке</span>
     </label>
-    <div class="bottom-bar__view-wrap">
-      <button type="button" class="bottom-bar__view-btn" id="viewSettingsBtn" data-i18n-title="viewSettings.title" title="Настройка вида">
+  </footer>
+
+  <div class="view-settings-float" id="viewSettingsWrap">
+      <button type="button" class="view-settings-float__btn bottom-bar__view-btn" id="viewSettingsBtn" data-i18n-title="viewSettings.title" title="Настройка вида">
         <span>🎨</span>
         <span data-i18n="viewSettings.button">Вид</span>
       </button>
@@ -63,7 +65,15 @@
             <span class="view-popover__size-val" id="popoverIconSizeVal">48×48</span>
           </div>
           <div class="view-popover__slider-wrap">
-            <input type="range" class="view-popover__slider" id="popoverIconSize" min="16" max="256" step="8" value="48">
+            <input type="range" class="view-popover__slider" id="popoverIconSize" min="16" max="256" step="8" list="icon-size-presets" value="48">
+            <datalist id="icon-size-presets">
+              <option value="16"></option>
+              <option value="32"></option>
+              <option value="48"></option>
+              <option value="64"></option>
+              <option value="128"></option>
+              <option value="256"></option>
+            </datalist>
           </div>
           <div class="view-popover__presets" id="popoverPresets">
             <button type="button" class="view-popover__preset-btn" data-size="16">16</button>
@@ -118,7 +128,6 @@
         </div>
       </div>
     </div>
-  </footer>
 
   <!-- Context menu -->
   <div class="ctx-menu" id="ctxMenu" hidden></div>
