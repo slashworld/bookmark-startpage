@@ -125,7 +125,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: max(4px, min(14px, calc(var(--bookmark-icon-size) * 0.16)));
+  border-radius: var(--radius);
   overflow: hidden;
   position: relative;
   background: var(--icon-plate-bg, #ffffff);
@@ -147,15 +147,13 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  padding: calc(var(--bookmark-icon-size) * 0.04);
-  box-sizing: border-box;
 }
 
 .bookmark-item__favicon.is-undersized {
   width: auto;
   height: auto;
-  max-width: 85%;
-  max-height: 85%;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 /* Stylized Letter Avatar */

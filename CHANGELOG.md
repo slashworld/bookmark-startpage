@@ -21,7 +21,8 @@ All notable changes to this project will be documented in this file.
 - Smart Crisp Display: icons smaller than requested size (e.g. 16px or 32px when 64px is chosen) are centered 1:1 in a dedicated container without blurry upscaling
 - Multi-tier favicon fallback: Google Favicon API with automatic Chrome local cache dispatch for intranet/internal URLs (`localhost`, private IPs, `.local`), and stylized vector letter avatars with deterministic Catppuccin gradients for sites without icons
 - Smart custom domain & NAS fallback: detects Google Favicon API 16px fallback on unindexed/private domains (e.g. DDNS, personal domains, home servers) and seamlessly upgrades to Chrome's local favicon cache for visited sites
-- High-contrast background plate under bookmark icons for both dark and light themes, ensuring clear visibility for dark icons with transparent backgrounds (like GitHub, Notion)
+- High-contrast background plate under bookmark icons with card-matching border radius (`var(--radius)`), clipping both icon and backing 1:1 at user-selected dimensions
+- Replaced emoji with custom vector SVG tile layout icon on the view settings button and popover header
 - Discrete snapping of the icon size slider to standard preset sizes (16, 32, 48, 64, 128, 256) with native datalist tick marks
 - Enlarged checkboxes (18px) with generous touch targets (8×12px padding) and hover states for title and URL display toggles
 - Relocated view settings button to the bottom-right corner of the folder content display area with elevated floating styling
