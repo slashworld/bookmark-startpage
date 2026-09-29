@@ -27,6 +27,8 @@ All notable changes to this project will be documented in this file.
 - Enlarged checkboxes (18px) with generous touch targets (8×12px padding) and hover states for title and URL display toggles
 - Relocated view settings button to the bottom-right corner of the folder content display area with elevated floating styling
 - Bookmark context menu action «Обновить иконку с сайта» (Refresh icon from site) and custom icon URL input in the edit bookmark modal
+- High-contrast background plate for tree navigator favicons with 3px radius and zero padding, preserving 14×14 sharpness and visibility on both dark and light themes
+- Darkened bookmark link text color in tree navigator (`--tree-link-text`) for improved readability while preserving primary folder label colors
 
 ### Changed
 - Split monolithic stylesheet into modular CSS files (`theme.css`, `layout.css`, `explorer.css`, `modals.css`, `dnd.css`) with `newtab.css` acting as the master import hub for clean maintainability

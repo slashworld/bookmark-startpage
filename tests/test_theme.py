@@ -195,8 +195,60 @@ def main():
     assert res6['darkFrontColor'] == 'rgb(250, 179, 135)', f"Expected dark front color rgb(250, 179, 135), got {res6['darkFrontColor']}"
     assert res6['darkBackColor'] == 'rgb(224, 143, 88)', f"Expected dark back color rgb(224, 143, 88), got {res6['darkBackColor']}"
 
+    # 7. Tree node bookmark text & favicon backing plate check
+    res7 = evaluate(ws_url, """
+    (async () => {
+        await Theme.setTheme('light');
+        await new Promise(r => setTimeout(r, 100));
+
+        const lightLink = document.querySelector('.tree-node__label--link');
+        const lightFolder = document.querySelector('.tree-node:not(.tree-node--link) > .tree-node__label:not(.active)');
+        const lightFavicon = document.querySelector('.tree-node__favicon');
+
+        const lightLinkColor = lightLink ? getComputedStyle(lightLink).color : null;
+        const lightFolderColor = lightFolder ? getComputedStyle(lightFolder).color : null;
+        const lightFavBg = lightFavicon ? getComputedStyle(lightFavicon).backgroundColor : null;
+        const lightFavPadding = lightFavicon ? getComputedStyle(lightFavicon).padding : null;
+        const lightFavRadius = lightFavicon ? getComputedStyle(lightFavicon).borderRadius : null;
+
+        await Theme.setTheme('dark');
+        await new Promise(r => setTimeout(r, 100));
+
+        const darkLink = document.querySelector('.tree-node__label--link');
+        const darkFolder = document.querySelector('.tree-node:not(.tree-node--link) > .tree-node__label:not(.active)');
+        const darkFavicon = document.querySelector('.tree-node__favicon');
+
+        const darkLinkColor = darkLink ? getComputedStyle(darkLink).color : null;
+        const darkFolderColor = darkFolder ? getComputedStyle(darkFolder).color : null;
+        const darkFavBg = darkFavicon ? getComputedStyle(darkFavicon).backgroundColor : null;
+
+        await Theme.setTheme('auto');
+
+        return {
+            lightLinkColor,
+            lightFolderColor,
+            lightFavBg,
+            lightFavPadding,
+            lightFavRadius,
+            darkLinkColor,
+            darkFolderColor,
+            darkFavBg
+        };
+    })()
+    """)
+    print("[7] Tree navigator styling check:", json.dumps(res7, indent=2))
+    assert res7['lightLinkColor'] == 'rgb(92, 95, 119)', f"Expected light link color rgb(92, 95, 119), got {res7['lightLinkColor']}"
+    assert res7['lightFolderColor'] == 'rgb(76, 79, 105)', f"Expected light folder color rgb(76, 79, 105), got {res7['lightFolderColor']}"
+    assert res7['lightFavBg'] == 'rgb(255, 255, 255)', f"Expected light favicon bg rgb(255, 255, 255), got {res7['lightFavBg']}"
+    assert res7['lightFavPadding'] == '0px', f"Expected light favicon padding 0px, got {res7['lightFavPadding']}"
+    assert res7['lightFavRadius'] == '3px', f"Expected light favicon radius 3px, got {res7['lightFavRadius']}"
+    assert res7['darkLinkColor'] == 'rgb(166, 173, 200)', f"Expected dark link color rgb(166, 173, 200), got {res7['darkLinkColor']}"
+    assert res7['darkFolderColor'] == 'rgb(205, 214, 244)', f"Expected dark folder color rgb(205, 214, 244), got {res7['darkFolderColor']}"
+    assert res7['darkFavBg'] == 'rgb(255, 255, 255)', f"Expected dark favicon bg rgb(255, 255, 255), got {res7['darkFavBg']}"
+
     print("\nALL THEME TESTS PASSED! ✅")
 
 if __name__ == '__main__':
     main()
+
 

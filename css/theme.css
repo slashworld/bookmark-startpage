@@ -30,6 +30,7 @@
   --icon-plate-bg: #ffffff;
   --icon-plate-border: rgba(255, 255, 255, 0.15);
   --icon-plate-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --tree-link-text: #a6adc8;
 }
 
 :root[data-theme="light"] {
@@ -49,6 +50,7 @@
   --icon-plate-bg: #ffffff;
   --icon-plate-border: rgba(0, 0, 0, 0.08);
   --icon-plate-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --tree-link-text: #5c5f77;
 }
 
 @media (prefers-color-scheme: light) {
@@ -69,6 +71,7 @@
     --icon-plate-bg: #ffffff;
     --icon-plate-border: rgba(0, 0, 0, 0.08);
     --icon-plate-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --tree-link-text: #5c5f77;
   }
 }
 
