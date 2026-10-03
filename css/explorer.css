@@ -392,12 +392,14 @@
 }
 
 .view-toggle__btn .folder-icon,
+.view-toggle__btn .view-toggle__icon,
 .view-toggle__action-btn .folder-icon {
   margin-right: 5px;
   vertical-align: -2px;
 }
 
 .view-toggle__btn .folder-icon .folder-svg,
+.view-toggle__btn .view-toggle__icon svg,
 .view-toggle__action-btn .folder-icon .folder-svg {
   width: 14px;
   height: 14px;

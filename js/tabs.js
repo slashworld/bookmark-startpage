@@ -96,6 +96,9 @@ const Tabs = {
       Tabs.activeTabId = Tabs.list.length > 0 ? Tabs.list[0].id : null;
     }
     await Tabs._persist();
+    if (typeof Render !== 'undefined' && Render.deleteTabTreeState) {
+      await Render.deleteTabTreeState(tabId);
+    }
     return true;
   },
 

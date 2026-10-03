@@ -35,9 +35,10 @@ The project includes automated integration tests using the Chrome DevTools Proto
 python3 tests/run_browser.py &
 
 # Run individual test suites:
-python3 tests/test_view_settings.py  # Tests card layouts, icon sizes, and favicon resolution
-python3 tests/test_theme.py          # Tests theme switching, SVG folder icons, and CSS variables
-python3 tests/test_dnd.py            # Tests drag-and-drop, multi-select, and tree movements
+python3 tests/test_view_settings.py     # Tests card layouts, icon sizes, and favicon resolution
+python3 tests/test_theme.py             # Tests theme switching, SVG folder icons, and CSS variables
+python3 tests/test_dnd.py               # Tests drag-and-drop, multi-select, and tree movements
+python3 tests/test_tree_persistence.py  # Tests tree open/closed state persistence across reloads
 ```
 
 **Linting:** None configured (no ESLint/Prettier setup). Follow style guide below.
@@ -176,6 +177,7 @@ Stored in `chrome.storage.local`:
    ```
 2. `bsp_site_icons` — Scraped high-resolution site icon URLs: `{ [pageUrlOrOrigin]: iconUrl }`
 3. `bsp_theme` — Theme setting: `'auto' | 'light' | 'dark'`
+4. `bsp_tree_state` — Per-tab tree navigation state: `{ [tabId]: { expandedFolderIds: string[], activeFolderId: string|null } }`
 
 Tab IDs generated: `'tab-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6)`
 

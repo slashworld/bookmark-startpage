@@ -29,6 +29,7 @@ All notable changes to this project will be documented in this file.
 - Bookmark context menu action «Обновить иконку с сайта» (Refresh icon from site) and custom icon URL input in the edit bookmark modal
 - High-contrast background plate for tree navigator favicons with 3px radius and zero padding, preserving 14×14 sharpness and visibility on both dark and light themes
 - Darkened bookmark link text color in tree navigator (`--tree-link-text`) for improved readability while preserving primary folder label colors
+- Persistent tree navigator state: open and closed states of folders, as well as the active folder, are automatically saved per tab in `bsp_tree_state` and preserved across page refreshes
 
 ### Changed
 - Split monolithic stylesheet into modular CSS files (`theme.css`, `layout.css`, `explorer.css`, `modals.css`, `dnd.css`) with `newtab.css` acting as the master import hub for clean maintainability
@@ -40,6 +41,7 @@ All notable changes to this project will be documented in this file.
 - Improved visibility and borders for inactive tabs without an assigned color
 - Fixed modal editor behavior: clicking outside the modal dialog no longer closes it
 - Fixed white backing plate protruding beyond bookmark icons: replaced container border with outer box-shadow and applied edge-to-edge cover fitting so icons and backing plates are 100% flush without white margins or letterbox gaps
+- Replaced emoji with clean vector SVG list icon in the «All links» view mode toggle button
 
 ## [1.0.0] - 2026-03-22
 

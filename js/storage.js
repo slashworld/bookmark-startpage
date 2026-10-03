@@ -69,6 +69,20 @@ const Storage = {
     });
   },
 
+  async getTreeState() {
+    return new Promise(resolve => {
+      chrome.storage.local.get('bsp_tree_state', (result) => {
+        resolve(result.bsp_tree_state || null);
+      });
+    });
+  },
+
+  async saveTreeState(treeState) {
+    return new Promise(resolve => {
+      chrome.storage.local.set({ bsp_tree_state: treeState }, resolve);
+    });
+  },
+
   /**
    * Serialize config to a structured JavaScript object.
    * Uses structured path info (fullPath + relativePath + topFolderIndex)

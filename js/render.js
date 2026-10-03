@@ -7,9 +7,13 @@ const Render = {
   activeFolderId: null,
   currentExplorerNode: null,
   expandedFolderIds: new Set(),
+  _allTreeStates: null,
+  _treeStateLoaded: false,
+  _currentLoadedTabId: null,
 
   async renderAll() {
     await Render.loadSettings();
+    await Render.loadTreeState();
     Render.renderTabsStrip();
     await Render.renderContent();
     if (typeof Selection !== 'undefined') {
@@ -20,6 +24,78 @@ const Render = {
   async loadSettings() {
     const config = await Storage.load();
     Render._settings = config.settings || Storage.DEFAULT_CONFIG.settings;
+  },
+
+  async loadTreeState(force = false) {
+    const tabId = (typeof Tabs !== 'undefined' && Tabs.activeTabId) ? Tabs.activeTabId : 'default';
+    if (Render._treeStateLoaded && !force && Render._currentLoadedTabId === tabId) {
+      return;
+    }
+
+    if (!Render._allTreeStates) {
+      try {
+        const raw = localStorage.getItem('bsp_tree_state');
+        if (raw) Render._allTreeStates = JSON.parse(raw);
+      } catch (_) {}
+
+      try {
+        if (typeof Storage !== 'undefined' && Storage.getTreeState) {
+          const state = await Storage.getTreeState();
+          if (state && Object.keys(state).length > 0) {
+            Render._allTreeStates = state;
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (!Render._allTreeStates) {
+      Render._allTreeStates = {};
+    }
+
+    Render._currentLoadedTabId = tabId;
+    const tabState = Render._allTreeStates[tabId];
+    if (tabState) {
+      Render.expandedFolderIds = new Set((tabState.expandedFolderIds || []).map(String));
+      Render.activeFolderId = tabState.activeFolderId || null;
+      Render._treeStateLoaded = true;
+    } else {
+      Render.expandedFolderIds = new Set();
+      Render.activeFolderId = null;
+      Render._treeStateLoaded = false;
+    }
+  },
+
+  async saveTreeState() {
+    const tabId = (typeof Tabs !== 'undefined' && Tabs.activeTabId) ? Tabs.activeTabId : 'default';
+    if (!Render._allTreeStates) Render._allTreeStates = {};
+
+    Render._allTreeStates[tabId] = {
+      expandedFolderIds: Array.from(Render.expandedFolderIds || []),
+      activeFolderId: Render.activeFolderId || null
+    };
+
+    try {
+      localStorage.setItem('bsp_tree_state', JSON.stringify(Render._allTreeStates));
+    } catch (_) {}
+
+    try {
+      if (typeof Storage !== 'undefined' && Storage.saveTreeState) {
+        await Storage.saveTreeState(Render._allTreeStates);
+      }
+    } catch (_) {}
+  },
+
+  async deleteTabTreeState(tabId) {
+    if (!tabId || !Render._allTreeStates) return;
+    delete Render._allTreeStates[tabId];
+    try {
+      localStorage.setItem('bsp_tree_state', JSON.stringify(Render._allTreeStates));
+    } catch (_) {}
+    try {
+      if (typeof Storage !== 'undefined' && Storage.saveTreeState) {
+        await Storage.saveTreeState(Render._allTreeStates);
+      }
+    } catch (_) {}
   },
 
   s() { return Render._settings || Storage.DEFAULT_CONFIG.settings; },
@@ -117,12 +193,10 @@ const Render = {
       // Left click — activate (synchronous, no storage event loop)
       btn.addEventListener('click', async () => {
         if (Tabs.activeTabId !== tab.id) {
-          Render.activeFolderId = null;
-          if (Render.expandedFolderIds) {
-            Render.expandedFolderIds.clear();
-          }
+          await Render.saveTreeState();
+          Tabs.activate(tab.id);  // synchronous set + fire-and-forget save
+          await Render.loadTreeState(true);
         }
-        Tabs.activate(tab.id);  // synchronous set + fire-and-forget save
         await Render.renderAll();
       });
 
@@ -196,6 +270,7 @@ const Render = {
 
   async renderContent() {
     await Render.loadSettings();
+    await Render.loadTreeState();
     const area = document.getElementById('contentArea');
     const activeTab = Tabs.getActive();
 
@@ -258,7 +333,11 @@ const Render = {
         btn.appendChild(Theme.createFolderIcon());
         btn.appendChild(document.createTextNode(' ' + I18n.t('view.explorer')));
       } else {
-        btn.textContent = '📋 ' + I18n.t('view.allLinks');
+        const listIcon = document.createElement('span');
+        listIcon.className = 'view-toggle__icon';
+        listIcon.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`;
+        btn.appendChild(listIcon);
+        btn.appendChild(document.createTextNode(' ' + I18n.t('view.allLinks')));
       }
       btn.addEventListener('click', async () => {
         Tabs.setViewMode(tabId, mode);  // synchronous + fire-and-forget save
@@ -691,6 +770,7 @@ const Render = {
         break;
       }
     }
+    await Render.saveTreeState();
   },
 
   createExplorerView(rootNode) {
@@ -704,13 +784,22 @@ const Render = {
     }
     Render.currentExplorerNode = activeNode;
 
+    // If no saved tree state exists for this tab yet, expand root node by default
+    if (!Render._treeStateLoaded) {
+      if (Render.expandedFolderIds) {
+        Render.expandedFolderIds.add(String(rootNode.id));
+      }
+      Render._treeStateLoaded = true;
+      Render.saveTreeState();
+    }
+
     const showLinks = Render.s().showLinksInTree !== false;
     const ex = document.createElement('div');
     ex.className = 'explorer';
 
     const tree = document.createElement('div');
     tree.className = 'explorer__tree';
-    tree.appendChild(Render.treeNode(rootNode, 0, true, showLinks, activeNode.id));
+    tree.appendChild(Render.treeNode(rootNode, 0, false, showLinks, activeNode.id));
     ex.appendChild(tree);
 
     const contentWrap = document.createElement('div');
@@ -840,6 +929,7 @@ const Render = {
       }
       const cp = document.getElementById('explorerContent');
       if (cp) Render.folderContent(cp, node);
+      Render.saveTreeState();
     });
 
     label.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, node));
@@ -1082,6 +1172,7 @@ const Render = {
           tn.click();
         } else {
           Render.folderContent(panel, folder);
+          Render.saveTreeState();
         }
       });
       div.addEventListener('contextmenu', (e) => ContextMenu.showForFolder(e, folder));
