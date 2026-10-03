@@ -129,9 +129,8 @@
   overflow: hidden;
   position: relative;
   background: var(--icon-plate-bg, #ffffff);
-  border: 1px solid var(--icon-plate-border, rgba(255, 255, 255, 0.15));
-  box-shadow: var(--icon-plate-shadow, 0 1px 3px rgba(0, 0, 0, 0.25));
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  box-shadow: 0 0 0 1px var(--icon-plate-border, rgba(255, 255, 255, 0.15)), var(--icon-plate-shadow, 0 1px 3px rgba(0, 0, 0, 0.25));
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 .bookmark-item__icon-wrap.has-undersized-icon {
@@ -141,19 +140,17 @@
 .bookmark-item__favicon {
   display: block;
   flex-shrink: 0;
-}
-
-.bookmark-item__favicon.is-fullsize {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  image-rendering: -webkit-optimize-contrast;
 }
 
+.bookmark-item__favicon.is-fullsize,
 .bookmark-item__favicon.is-undersized {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Stylized Letter Avatar */

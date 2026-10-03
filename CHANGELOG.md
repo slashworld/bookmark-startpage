@@ -39,6 +39,7 @@ All notable changes to this project will be documented in this file.
 - Added empty states with quick action buttons and right-click context menus for empty folders and flat views
 - Improved visibility and borders for inactive tabs without an assigned color
 - Fixed modal editor behavior: clicking outside the modal dialog no longer closes it
+- Fixed white backing plate protruding beyond bookmark icons: replaced container border with outer box-shadow and applied edge-to-edge cover fitting so icons and backing plates are 100% flush without white margins or letterbox gaps
 
 ## [1.0.0] - 2026-03-22
 

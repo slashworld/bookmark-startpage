@@ -9,13 +9,14 @@ import os
 import socket
 import struct
 import subprocess
+import sys
 import time
 import urllib.request
 
-PROFILE_DIR = '/tmp/chrome-test-startpage'
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 EXT_PATH = ROOT_DIR
-CDP_PORT = 9222
+CDP_PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 9222
+PROFILE_DIR = f'/tmp/chrome-test-startpage-{CDP_PORT}' if CDP_PORT != 9222 else '/tmp/chrome-test-startpage'
 
 def prepare_profile():
     default_dir = os.path.join(PROFILE_DIR, 'Default')
@@ -153,6 +154,8 @@ def main():
         'google-chrome',
         f'--user-data-dir={PROFILE_DIR}',
         f'--remote-debugging-port={CDP_PORT}',
+        f'--load-extension={EXT_PATH}',
+        f'--disable-extensions-except={EXT_PATH}',
         '--no-first-run',
         '--no-default-browser-check',
         'chrome://extensions',
@@ -160,7 +163,14 @@ def main():
     ]
 
     print("Launching Chrome...")
-    proc = subprocess.Popen(cmd, env=env)
+    proc = subprocess.Popen(
+        cmd,
+        env=env,
+        start_new_session=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL
+    )
 
     # Wait for Chrome to initialize CDP
     for _ in range(10):
@@ -173,8 +183,7 @@ def main():
 
     load_extension_cdp(CDP_PORT, EXT_PATH)
 
-    print("Chrome is running. Waiting for process to exit...")
-    proc.wait()
+    print("Chrome launched successfully in detached mode.")
 
 if __name__ == '__main__':
     main()

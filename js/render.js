@@ -501,15 +501,9 @@ const Render = {
     img.className = 'bookmark-item__favicon';
 
     const applySizing = () => {
-      if (img.naturalWidth > 0 && img.naturalWidth < iconSize) {
-        img.classList.remove('is-fullsize');
-        img.classList.add('is-undersized');
-        iconWrap.classList.add('has-undersized-icon');
-      } else {
-        img.classList.remove('is-undersized');
-        img.classList.add('is-fullsize');
-        iconWrap.classList.remove('has-undersized-icon');
-      }
+      img.classList.remove('is-undersized');
+      img.classList.add('is-fullsize');
+      iconWrap.classList.remove('has-undersized-icon');
     };
 
     let fallbackTried = false;
