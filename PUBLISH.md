@@ -47,7 +47,7 @@ Copy from `STORE.md` to Chrome Web Store Developer Dashboard:
 - **Detailed Description:** See `STORE.md`
 - **Category:** Productivity
 - **Language:** English, Russian
-- **Privacy Policy URL:** `https://github.com/slashworld/bookmark-startpage/blob/main/PRIVACY.md`
+- **Privacy Policy URL:** `https://github.com/slashworld/bookmark-startpage/blob/master/PRIVACY.md`
 - **Support URL:** `https://github.com/slashworld/bookmark-startpage/issues`
 - **Website:** `https://github.com/slashworld/bookmark-startpage`
 
