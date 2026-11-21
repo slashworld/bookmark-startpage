@@ -51,22 +51,27 @@ const I18n = {
 
   /**
    * Set active language and load translations
-   * @param {string} lang - Language code (e.g., 'en', 'ru')
+   * @param {string} lang - Language code (e.g., 'en', 'ru', or 'auto')
    * @param {boolean} saveToStorage - Whether to save to storage (default: true)
    */
   async setLanguage(lang, saveToStorage = true) {
-    if (!this._availableLangs.includes(lang)) {
-      lang = this._fallbackLang;
+    const settingValue = (lang === 'auto' || !lang) ? 'auto' : lang;
+    let resolvedLang = lang;
+
+    if (!resolvedLang || resolvedLang === 'auto') {
+      const browserLang = this._detectBrowserLanguage();
+      resolvedLang = this._availableLangs.includes(browserLang) ? browserLang : this._fallbackLang;
+    } else if (!this._availableLangs.includes(resolvedLang)) {
+      resolvedLang = this._fallbackLang;
     }
-    
-    this._currentLang = lang;
+
+    this._currentLang = resolvedLang;
     
     // Load translations
     try {
       const url = chrome.runtime?.getURL 
-        ? chrome.runtime.getURL(`locales/${lang}.json`)
-        : `locales/${lang}.json`;
-      console.log('[I18n] Loading translations from:', url);
+        ? chrome.runtime.getURL(`locales/${resolvedLang}.json`)
+        : `locales/${resolvedLang}.json`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -74,15 +79,14 @@ const I18n = {
       const text = await response.text();
       try {
         this._translations = JSON.parse(text);
-        console.log('[I18n] Loaded translations for', lang, '- keys:', Object.keys(this._translations).join(', '));
       } catch (parseError) {
         console.error('[I18n] Failed to parse JSON:', parseError);
         throw parseError;
       }
     } catch (e) {
-      console.error(`[I18n] Failed to load translations for ${lang}:`, e);
+      console.error(`[I18n] Failed to load translations for ${resolvedLang}:`, e);
       // Fallback to English
-      if (lang !== this._fallbackLang) {
+      if (resolvedLang !== this._fallbackLang) {
         try {
           const url = chrome.runtime?.getURL 
             ? chrome.runtime.getURL(`locales/${this._fallbackLang}.json`)
@@ -101,14 +105,14 @@ const I18n = {
     if (saveToStorage) {
       const config = await Storage.load();
       if (!config.settings) config.settings = { ...Storage.DEFAULT_CONFIG.settings };
-      config.settings.language = lang;
+      config.settings.language = settingValue === 'auto' ? 'auto' : resolvedLang;
       await Storage.save(config);
     }
     
     // Update DOM
     this.updateDOM();
     
-    return lang;
+    return resolvedLang;
   },
 
   /**
@@ -219,10 +223,16 @@ const I18n = {
         
         const newConfig = changes.bsp_config.newValue || {};
         const newLang = newConfig.settings?.language;
-        
-        // Only react to language changes (and not from this page's own save)
-        if (newLang && newLang !== this._currentLang && newLang !== 'auto') {
-          await this.setLanguage(newLang, false);
+
+        let targetLang = newLang;
+        if (!targetLang || targetLang === 'auto') {
+          const browserLang = this._detectBrowserLanguage();
+          targetLang = this._availableLangs.includes(browserLang) ? browserLang : this._fallbackLang;
+        }
+
+        // Only react to effective language changes
+        if (targetLang && targetLang !== this._currentLang) {
+          await this.setLanguage(newLang || 'auto', false);
         }
       });
     }

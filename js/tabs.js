@@ -23,9 +23,11 @@ const Tabs = {
       }
     }
 
-    // Fallback: first tab
-    if (Tabs.list.length > 0 && !Tabs.activeTabId) {
+    // Fallback: first tab if activeTabId is missing or no longer in Tabs.list
+    if (Tabs.list.length > 0 && !Tabs.list.some(t => t.id === Tabs.activeTabId)) {
       Tabs.activeTabId = Tabs.list[0].id;
+    } else if (Tabs.list.length === 0) {
+      Tabs.activeTabId = null;
     }
 
     // Auto-create main tab if rootFolderId set but no tabs

@@ -181,6 +181,10 @@ document.getElementById('saveBtn').addEventListener('click', async function () {
   config.rootFolderId = selectedFolderId;
 
   const node = await Bookmarks.getNode(selectedFolderId);
+  if (!node) {
+    showStatus('saveStatus', I18n.t('view.folderNotFound'), 'error');
+    return;
+  }
   if (config.tabs.length > 0) {
     config.tabs[0].bookmarkFolderId = selectedFolderId;
     config.tabs[0].title = node.title || I18n.t('tabs.main');
@@ -336,18 +340,18 @@ document.getElementById('saveViewSettingsBtn')?.addEventListener('click', saveVi
 document.getElementById('configSaveBtn').addEventListener('click', async function () {
   const btn = this;
   btn.disabled = true;
-  btn.textContent = '⏳ ' + I18n.t('status.saving');
+  btn.textContent = I18n.t('status.saving');
 
   try {
     const result = await ConfigStore.save();
-    showStatus('configStatus', '✓ ' + I18n.t('status.configSaved', { title: result.title }), 'success');
+    showStatus('configStatus', I18n.t('status.configSaved', { title: result.title }), 'success');
     AutoSave.reset(); // just saved manually, reset timer
   } catch (e) {
     console.error('Config save error:', e);
-    showStatus('configStatus', '✕ ' + I18n.t('common.error') + ': ' + e.message, 'error');
+    showStatus('configStatus', I18n.t('common.error') + ': ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '💾 ' + I18n.t('export.save');
+    btn.textContent = I18n.t('export.save');
   }
 });
 
@@ -358,13 +362,13 @@ document.getElementById('configCopyUrlBtn').addEventListener('click', async func
   btn.disabled = true;
   try {
     const configStr = await Storage.exportToString();
-    const url = chrome.runtime.getURL('newtab.html') + '#config=' + configStr;
+    const url = chrome.runtime.getURL('newtab.html') + '#config=' + encodeURIComponent(configStr);
     await navigator.clipboard.writeText(url);
-    btn.textContent = '✓ ' + I18n.t('common.copied');
-    setTimeout(() => { btn.textContent = '🔗 ' + I18n.t('export.copyUrl'); btn.disabled = false; }, 2000);
+    btn.textContent = I18n.t('common.copied');
+    setTimeout(() => { btn.textContent = I18n.t('export.copyUrl'); btn.disabled = false; }, 2000);
   } catch (e) {
     console.error('Copy URL error:', e);
-    showStatus('configStatus', '✕ ' + I18n.t('common.error') + ': ' + e.message, 'error');
+    showStatus('configStatus', I18n.t('common.error') + ': ' + e.message, 'error');
     btn.disabled = false;
   }
 });
@@ -382,7 +386,7 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
 
   const btn = this;
   btn.disabled = true;
-  btn.textContent = '⏳ ' + I18n.t('status.loading');
+  btn.textContent = I18n.t('status.loading');
 
   try {
     const result = await ConfigStore.load();
@@ -397,13 +401,13 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
     }
 
     const importResult = await applyImportedConfig(result.data);
-    const dateStr = result.timestamp
+    const dateStr = escapeHtml(result.timestamp
       ? result.timestamp.toLocaleString()
-      : I18n.t('common.none');
+      : I18n.t('common.none'));
 
     if (importResult.failed === 0) {
       OptsModal.show(I18n.t('export.loaded'),
-        '<div class="result-status result-status--ok">✓</div>' +
+        '<div class="result-status result-status--ok">OK</div>' +
         '<p>' + I18n.t('export.loaded') + '</p>' +
         '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
         '<p class="result-detail">' + I18n.t('export.tabsCount', { imported: importResult.imported }) + '</p>',
@@ -420,7 +424,7 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
       );
     } else {
       OptsModal.show(I18n.t('export.loadError'),
-        '<div class="result-status result-status--err">✕</div>' +
+        '<div class="result-status result-status--err">X</div>' +
         '<p>' + I18n.t('export.noneLoaded') + '</p>' +
         '<p>' + I18n.t('export.date') + ': <span class="result-date">' + dateStr + '</span></p>' +
         '<p class="result-detail">' + I18n.t('export.structureDiffers') + '</p>'
@@ -429,12 +433,12 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
   } catch (e) {
     console.error('Config load error:', e);
     OptsModal.show(I18n.t('common.error'),
-      '<div class="result-status result-status--err">✕</div>' +
-      '<p class="result-error">' + e.message + '</p>'
+      '<div class="result-status result-status--err">X</div>' +
+      '<p class="result-error">' + escapeHtml(e.message) + '</p>'
     );
   } finally {
     btn.disabled = false;
-    btn.textContent = '📂 ' + I18n.t('export.load');
+    btn.textContent = I18n.t('export.load');
   }
 });
 
@@ -443,7 +447,7 @@ document.getElementById('configLoadBtn').addEventListener('click', async functio
 document.getElementById('configFileExportBtn').addEventListener('click', async function() {
   const btn = this;
   btn.disabled = true;
-  btn.textContent = '⏳ ' + I18n.t('status.saving');
+  btn.textContent = I18n.t('status.saving');
 
   try {
     const data = await Storage.exportData();
@@ -458,13 +462,13 @@ document.getElementById('configFileExportBtn').addEventListener('click', async f
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showStatus('configStatus', '✓ ' + I18n.t('export.fileExported'), 'success');
+    showStatus('configStatus', I18n.t('export.fileExported'), 'success');
   } catch (e) {
     console.error('File export error:', e);
-    showStatus('configStatus', '✕ ' + I18n.t('common.error') + ': ' + e.message, 'error');
+    showStatus('configStatus', I18n.t('common.error') + ': ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '💾 ' + I18n.t('export.saveFile');
+    btn.textContent = I18n.t('export.saveFile');
   }
 });
 
@@ -528,7 +532,7 @@ async function processConfigFile(file) {
     }
 
     const importResult = await applyImportedConfig(data);
-    const dateStr = file.name;
+    const dateStr = escapeHtml(file.name);
 
     if (importResult.failed === 0) {
       OptsModal.show(I18n.t('export.loaded'),
@@ -557,8 +561,8 @@ async function processConfigFile(file) {
   } catch (err) {
     console.error('File import error:', err);
     OptsModal.show(I18n.t('common.error'),
-      '<div class="result-status result-status--err">✕</div>' +
-      '<p class="result-error">' + err.message + '</p>'
+      '<div class="result-status result-status--err">X</div>' +
+      '<p class="result-error">' + escapeHtml(err.message) + '</p>'
     );
   }
 }
@@ -590,8 +594,8 @@ document.getElementById('copyBtn').addEventListener('click', function () {
   textarea.select();
   navigator.clipboard.writeText(textarea.value).then(function () {
     var btn = document.getElementById('copyBtn');
-    btn.textContent = '✓ ' + I18n.t('common.copied');
-    setTimeout(function () { btn.textContent = '📋 ' + I18n.t('export.copy'); }, 2000);
+    btn.textContent = I18n.t('common.copied');
+    setTimeout(function () { btn.textContent = I18n.t('export.copy'); }, 2000);
   });
 });
 
@@ -665,6 +669,15 @@ const OptsModal = {
 OptsModal.init();
 
 // ==================== Helpers ====================
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function showStatus(id, text, type) {
   const el = document.getElementById(id);

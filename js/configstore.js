@@ -130,11 +130,13 @@ const ConfigStore = {
       config.settings = { ...Storage.DEFAULT_CONFIG.settings, ...data.settings };
     }
 
+    let rootRestored = false;
     if (data.rootPathInfo || data.rootPath) {
       const searchTarget = data.rootPathInfo || data.rootPath;
       const rootFolder = await Bookmarks.findFolderByPath(searchTarget);
       if (rootFolder) {
         config.rootFolderId = rootFolder.id;
+        rootRestored = true;
       } else {
         failed++;
       }
@@ -163,7 +165,7 @@ const ConfigStore = {
     }
 
     await Storage.save(config);
-    return { imported, failed };
+    return { imported, failed, rootRestored };
   },
 
   /**
@@ -181,7 +183,7 @@ const ConfigStore = {
       if (!saved || !saved.data) return false;
 
       const res = await ConfigStore.applyConfig(saved.data);
-      if (res.imported > 0 || config.rootFolderId) {
+      if (res.imported > 0 || res.rootRestored) {
         console.log('[ConfigStore] Auto-restored config from bookmark backup:', saved.title);
         return true;
       }

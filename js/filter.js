@@ -7,6 +7,8 @@ const Filter = {
 
   init() {
     const input = document.getElementById('filterInput');
+    const clearBtn = document.getElementById('filterClear');
+    const currentTabCb = document.getElementById('filterCurrentTab');
 
     input.addEventListener('input', () => {
       clearTimeout(Filter._debounceTimer);
@@ -16,9 +18,19 @@ const Filter = {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         input.value = '';
+        if (clearBtn) clearBtn.hidden = true;
         Filter.apply('');
       }
     });
+
+    if (currentTabCb) {
+      currentTabCb.addEventListener('change', () => {
+        const q = input.value.trim();
+        if (q) {
+          Filter.apply(q);
+        }
+      });
+    }
   },
 
   async apply(query) {
@@ -33,6 +45,7 @@ const Filter = {
     const lowerQuery = query.toLowerCase();
 
     if (currentTabOnly) {
+      Filter.clearHighlights();
       await Filter.searchInTab(Tabs.getActive(), lowerQuery);
     } else {
       await Filter.searchEverywhere(lowerQuery);

@@ -3,8 +3,8 @@
   "name": "Bookmark Startpage",
   "version": "1.1.0",
   "description": "Replace new tab page with customizable bookmark-powered start page",
-  "author": "Your Name",
-  "homepage_url": "https://github.com/yourusername/bookmark-startpage",
+  "author": "slashworld",
+  "homepage_url": "https://github.com/slashworld/bookmark-startpage",
   "permissions": [
     "bookmarks",
     "storage",

@@ -29,7 +29,11 @@ const Storage = {
     return new Promise(resolve => {
       chrome.storage.local.get('bsp_config', (result) => {
         if (!result.bsp_config) {
-          resolve({ ...Storage.DEFAULT_CONFIG });
+          resolve({
+            ...Storage.DEFAULT_CONFIG,
+            tabs: [],
+            settings: { ...Storage.DEFAULT_CONFIG.settings }
+          });
           return;
         }
         const cfg = result.bsp_config;

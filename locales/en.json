@@ -93,6 +93,7 @@
     "fileExported": "Configuration file saved",
     "copyUrl": "Copy URL",
     "manual": "Manual export / import (text)",
+    "export": "Export",
     "generate": "Generate",
     "copy": "Copy",
     "import": "Import",

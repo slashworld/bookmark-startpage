@@ -130,10 +130,12 @@ const Bookmarks = {
       const parts = fullPath.split('/').filter(Boolean);
       relativePath = parts.slice(1).join('/');
       topFolderIndex = -1;
+    } else if (pathOrInfo && typeof pathOrInfo === 'object') {
+      fullPath = pathOrInfo.fullPath || '';
+      relativePath = pathOrInfo.relativePath || '';
+      topFolderIndex = pathOrInfo.topFolderIndex !== undefined ? pathOrInfo.topFolderIndex : -1;
     } else {
-      fullPath = pathOrInfo.fullPath;
-      relativePath = pathOrInfo.relativePath;
-      topFolderIndex = pathOrInfo.topFolderIndex;
+      return null;
     }
 
     // Strategy 1: exact path match

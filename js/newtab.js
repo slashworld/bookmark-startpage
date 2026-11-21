@@ -5,6 +5,7 @@
 // ==================== Config Import Handler ====================
 
 let _importPending = false;
+let _lastKnownSettingsJson = '';
 
 async function handleConfigImport(fromUserAction = false) {
   if (!location.hash.startsWith('#config=')) return;
@@ -104,8 +105,12 @@ document.addEventListener('visibilitychange', () => {
     Filter.apply('');
   });
 
-  // Empty-state settings button
-  document.getElementById('openSettings')?.addEventListener('click', openOptionsPage);
+  // Empty-state settings button (delegated so it keeps working after contentArea re-renders)
+  document.getElementById('contentArea').addEventListener('click', (e) => {
+    if (e.target.closest('#openSettings')) {
+      openOptionsPage();
+    }
+  });
   // Gear button
   document.getElementById('gearBtn').addEventListener('click', openOptionsPage);
 
@@ -114,7 +119,7 @@ document.addEventListener('visibilitychange', () => {
     const cfg = await Storage.load();
     if (!cfg.settings) cfg.settings = { ...Storage.DEFAULT_CONFIG.settings };
     cfg.settings.openInNewTab = e.target.checked;
-    lastKnownSettingsJson = JSON.stringify(cfg.settings);
+    _lastKnownSettingsJson = JSON.stringify(cfg.settings);
     await Storage.save(cfg);
     await Render.renderContent();
   });
@@ -123,8 +128,9 @@ document.addEventListener('visibilitychange', () => {
   // We detect this by checking if the change was NOT from this page
   // (i.e. tabs structure changed, rootFolderId changed, or settings changed).
   // We do NOT re-init on lastActiveTabId changes or viewMode changes.
-  let lastKnownRootId = (await Storage.load()).rootFolderId;
-  let lastKnownSettingsJson = JSON.stringify((await Storage.load()).settings || {});
+  const initialCfg = await Storage.load();
+  let lastKnownRootId = initialCfg.rootFolderId;
+  _lastKnownSettingsJson = JSON.stringify(initialCfg.settings || {});
 
   chrome.storage.onChanged.addListener(async (changes) => {
     if (!changes.bsp_config) return;
@@ -133,9 +139,9 @@ document.addEventListener('visibilitychange', () => {
     const newSettingsJson = JSON.stringify(newConfig.settings || {});
 
     // Only re-init if root folder or settings changed (likely from options page)
-    if (newRootId !== lastKnownRootId || newSettingsJson !== lastKnownSettingsJson) {
+    if (newRootId !== lastKnownRootId || newSettingsJson !== _lastKnownSettingsJson) {
       lastKnownRootId = newRootId;
-      lastKnownSettingsJson = newSettingsJson;
+      _lastKnownSettingsJson = newSettingsJson;
       await Tabs.init();
       await initGlobalSettings();
       await Render.renderAll();
@@ -214,6 +220,7 @@ function initViewSettings() {
     const currentCfg = await Storage.load();
     if (!currentCfg.settings) currentCfg.settings = { ...Storage.DEFAULT_CONFIG.settings };
     Object.assign(currentCfg.settings, updates);
+    _lastKnownSettingsJson = JSON.stringify(currentCfg.settings);
     await Storage.save(currentCfg);
     await Render.renderContent();
   };
