@@ -169,8 +169,8 @@ def main():
     prepare_profile()
 
     env = os.environ.copy()
-    env['DISPLAY'] = env.get('DISPLAY', ':0')
-    env['WAYLAND_DISPLAY'] = env.get('WAYLAND_DISPLAY', 'wayland-0')
+    if 'DISPLAY' not in env and 'WAYLAND_DISPLAY' not in env:
+        env['DISPLAY'] = ':0'
 
     cmd = [
         'google-chrome',
