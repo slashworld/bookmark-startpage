@@ -6,51 +6,55 @@
 Bookmark Startpage
 
 ### Short Description (max 132 chars)
-Replace new tab with customizable bookmark-powered start page. Organize bookmarks into tabs, search, and manage directly.
+Replace new tab with a customizable bookmark-powered start page. Organize into tabs, customize cards, drag-and-drop, and search.
 
 ### Detailed Description
-Transform your Chrome new tab page into a powerful bookmark dashboard with Bookmark Startpage.
+Transform your Chrome new tab page into a fast, customizable bookmark dashboard with Bookmark Startpage.
 
 **Key Features:**
 
-📑 **Tab-Based Organization**
-- Create multiple tabs from your bookmark folders
-- Pin important tabs for quick access
-- Color-code tabs for visual organization
+- **Tab-Based Organization**
+  - Create multiple tabs from your bookmark folders (via context menu or drag-and-drop)
+  - Pin important tabs and color-code tabs for quick visual grouping
+  - Reorder tabs by dragging
 
-🔍 **Powerful Search**
-- Search across all bookmarks or filter by current tab
-- Find bookmarks by title, URL, or folder path
-- Highlight matching results instantly
+- **Two View Modes**
+  - Explorer: Navigate your hierarchical bookmark folder tree with persistent open/closed folder state per tab
+  - All Links: Grouped flat view of all bookmarks inside a tab
 
-📁 **Two View Modes**
-- Explorer: Navigate your bookmark tree structure
-- All Links: Flat view of all bookmarks in a tab
+- **Customizable Cards & High-Res Icons**
+  - Adjust icon size from 16x16 up to 256x256 with standard presets
+  - Choose label position: Right, Bottom (speed-dial tile), Left, or Top
+  - Show or hide bookmark titles and URLs independently
+  - Multi-tier icon resolution: high-resolution favicons, direct site SVG/Apple Touch Icon extraction, local cache for intranet/self-hosted URLs, custom icon URLs, and letter avatar fallbacks
 
-⚙️ **Customizable Settings**
-- Adjustable font sizes for tabs, navigation, and content
-- Open links in new tab or current tab
-- Show/hide links in folder tree
+- **Drag-and-Drop & Multi-Select**
+  - Drag bookmarks and folders directly into folders or tabs
+  - Enable Move mode for multi-selection, Shift-click ranges, and level-by-level selection
+  - Auto-expanding tree folders when moving items
 
-💾 **Easy Backup & Share**
-- Export configuration as shareable URL
-- Save configs as bookmarks (auto-backup)
-- Import settings on any device
+- **Powerful Search**
+  - Search across all tabs or filter only the current tab
+  - Match by bookmark title, URL, or folder path
 
-🌐 **Multi-Language**
-- Supports English and Russian
-- Auto-detects browser language
+- **Light & Dark Themes**
+  - Catppuccin Mocha (dark) and Catppuccin Latte (light)
+  - 3-state switcher: Auto (system), Light, Dark
 
-🎨 **Dark Theme**
-- Beautiful Catppuccin Mocha color scheme
-- Easy on the eyes for long browsing sessions
+- **Easy Backup & Sync**
+  - Auto-backup last 20 configurations to synced Chrome bookmarks with silent auto-restore on fresh install
+  - Export and import configurations as JSON files or shareable URLs
+
+- **Multi-Language**
+  - English and Russian with automatic browser language detection
 
 **Permissions Explained:**
-- Bookmarks: Read and manage your bookmarks for display and editing
-- Storage: Save your settings and tab configuration
-- Favicon: Display website icons for visual recognition
+- Bookmarks: Read and manage your bookmarks and store optional config backups
+- Storage: Save your settings, theme, tree state, and icon cache locally
+- Favicon: Display locally cached website icons (including intranet/local URLs)
+- Host permissions (`http://*/*`, `https://*/*`): Fetch bookmarked pages directly from your browser to extract vector/high-resolution site icons
 
-**No data collection** - all data stays in your browser.
+**Privacy first** - no personal data collection, no analytics, no ads.
 
 **Open source** - available on GitHub.
 
@@ -62,19 +66,20 @@ English, Russian
 
 ### Screenshots Required
 - Screenshot 1: Main view with tabs and bookmark grid (1280x800)
-- Screenshot 2: Explorer view showing folder tree (1280x800)
-- Screenshot 3: Settings page (1280x800)
-- Screenshot 4: Context menu for bookmark management (1280x800)
+- Screenshot 2: Explorer view showing folder tree and card view popover (1280x800)
+- Screenshot 3: Light theme (Catppuccin Latte) view (1280x800)
+- Screenshot 4: Settings page (1280x800)
+- Screenshot 5: Context menu / drag-and-drop move mode (1280x800)
 
 ### Icons Required
 - Icon 128x128 (for store display)
-- Icon 48x48 (for extension toolbar)
+- Icon 48x48 (for extension management page)
 
 ### Privacy Policy URL
-https://github.com/yourusername/bookmark-startpage/blob/main/PRIVACY.md
+https://github.com/slashworld/bookmark-startpage/blob/main/PRIVACY.md
 
 ### Support URL
-https://github.com/yourusername/bookmark-startpage/issues
+https://github.com/slashworld/bookmark-startpage/issues
 
 ### Website
-https://github.com/yourusername/bookmark-startpage
+https://github.com/slashworld/bookmark-startpage

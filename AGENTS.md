@@ -260,8 +260,10 @@ Multi-tier pipeline delivering maximum resolution without blurry upscaling:
 │   ├── run_browser.py    # Test environment Chrome runner
 │   ├── test_view_settings.py # Card layout, icon sizing, and favicon tests
 │   ├── test_theme.py     # Theme switcher and SVG folder icon tests
-│   └── test_dnd.py       # Drag-and-drop & multi-select integration tests
+│   ├── test_dnd.py       # Drag-and-drop & multi-select integration tests
+│   └── test_tree_persistence.py # Tree open/closed state persistence tests
 ├── CHANGELOG.md          # Version history and release notes
+├── GRAPHICS.md           # Graphics assets guide
 ├── README.md             # Project documentation
 ├── PRIVACY.md            # Privacy policy for Chrome Web Store
 ├── PUBLISH.md            # Chrome Web Store publication checklist

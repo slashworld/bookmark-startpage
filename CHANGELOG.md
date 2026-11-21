@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 - Quick action buttons in the toolbar to add bookmarks and folders from any view
 - Ability to create bookmarks and subfolders directly from the tab context menu
 - Drag-and-drop moving of bookmarks and folders (direct single-item drag without extra steps, «Move» toolbar button, Shift-click range selection, progressive level-by-level selection, and automatic expansion of source and destination folders in the tree)
-- Light theme (Catppuccin Latte) with a 3-state switcher on the start page: 💻 Auto (device default), ☀️ Light, 🌙 Dark, with local installation-level persistence
+- Light theme (Catppuccin Latte) with a 3-state switcher on the start page: Auto (device default), Light, Dark, with local installation-level persistence
 - High-contrast dual-tone vector SVG folder icons replacing emoji across all views (tree navigator, folder cards, group headers, and options page) with tailored colors for light (warm amber) and dark (peach/gold) themes
 - High-resolution site icons via Google Favicon API (`t0.gstatic.com`) with configurable icon sizes from 16×16 up to 256×256 (default 48×48)
 - Flexible card layouts with directional label positioning: Right (default horizontal), Bottom (speed-dial tile), Left, Top
@@ -42,6 +42,10 @@ All notable changes to this project will be documented in this file.
 - Fixed modal editor behavior: clicking outside the modal dialog no longer closes it
 - Fixed white backing plate protruding beyond bookmark icons: replaced container border with outer box-shadow and applied edge-to-edge cover fitting so icons and backing plates are 100% flush without white margins or letterbox gaps
 - Replaced emoji with clean vector SVG list icon in the «All links» view mode toggle button
+- Fixed shallow copy mutation of `Storage.DEFAULT_CONFIG`, stale `rootFolderId` check in `ConfigStore.autoRestoreIfEmpty`, and stale `activeTabId` after tab removal
+- Fixed `Auto` language selection in `I18n.setLanguage` and cross-tab sync, plus search checkbox reactivity and `Escape` clear button visibility in `Filter`
+- Fixed duplicate re-render when changing view settings in the start page popover and delegated `#openSettings` empty-state button clicks
+- Added HTML escaping in options page result modals, `encodeURIComponent` in config URL copy, dark-theme styling for `#languageSelect`, and synced `manifest.json`, `PRIVACY.md`, `README.md`, `STORE.md`, and `PUBLISH.md` with v1.1.0
 
 ## [1.0.0] - 2026-03-22
 
