@@ -127,15 +127,37 @@ def load_extension_cdp(port, ext_path):
         msg = json.dumps({'id': 1, 'method': 'Extensions.loadUnpacked', 'params': {'path': ext_path}}).encode()
         mask = os.urandom(4)
         masked = bytes(b ^ mask[i % 4] for i, b in enumerate(msg))
-        header = bytearray([0x81, 0x80 | len(msg)]) + mask
+        header = bytearray([0x81])
+        if len(msg) < 126:
+            header.append(0x80 | len(msg))
+        elif len(msg) < 65536:
+            header.append(0x80 | 126)
+            header.extend(struct.pack('!H', len(msg)))
+        else:
+            header.append(0x80 | 127)
+            header.extend(struct.pack('!Q', len(msg)))
+        header.extend(mask)
         s.sendall(header + masked)
 
         data = s.recv(4096)
         s.close()
 
         # Parse payload
+        if len(data) < 2:
+            print("CDP load extension warning: empty WebSocket response")
+            return None
         plen = data[1] & 0x7f
-        payload = json.loads(data[2:2+plen])
+        offset = 2
+        if plen == 126:
+            plen = struct.unpack('!H', data[2:4])[0]
+            offset = 4
+        elif plen == 127:
+            plen = struct.unpack('!Q', data[2:10])[0]
+            offset = 10
+        payload = json.loads(data[offset:offset+plen])
+        if 'error' in payload:
+            print(f"CDP load extension error: {payload['error']}")
+            return None
         ext_id = payload.get('result', {}).get('id')
         print(f"Extension successfully loaded via CDP: ID={ext_id}")
         return ext_id
@@ -154,8 +176,7 @@ def main():
         'google-chrome',
         f'--user-data-dir={PROFILE_DIR}',
         f'--remote-debugging-port={CDP_PORT}',
-        f'--load-extension={EXT_PATH}',
-        f'--disable-extensions-except={EXT_PATH}',
+        '--enable-unsafe-extension-debugging',
         '--no-first-run',
         '--no-default-browser-check',
         'chrome://extensions',
@@ -181,7 +202,17 @@ def main():
         except Exception:
             pass
 
-    load_extension_cdp(CDP_PORT, EXT_PATH)
+    ext_id = load_extension_cdp(CDP_PORT, EXT_PATH)
+    if ext_id:
+        try:
+            req = urllib.request.Request(
+                f'http://127.0.0.1:{CDP_PORT}/json/new?chrome://newtab',
+                method='PUT'
+            )
+            with urllib.request.urlopen(req, timeout=3):
+                pass
+        except Exception as e:
+            print(f"Warning: could not open newtab after loading extension: {e}")
 
     print("Chrome launched successfully in detached mode.")
 
